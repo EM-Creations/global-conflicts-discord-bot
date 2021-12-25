@@ -50,8 +50,6 @@ export class MissionsController {
 
   @Post('/request_audit')
   async requestAudit(@Body() body): Promise<object> {
-    console.log(body);
-
     const newMissionEmbed = new MessageEmbed()
       .setColor('#22cf26')
       .setTitle(body.name)
@@ -62,7 +60,7 @@ export class MissionsController {
 
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
-      process.env.DISCORD_BOT_CHANNEL,
+      process.env.DISCORD_BOT_MISSION_REVIEWER_CHANNEL,
     ) as TextChannel;
     await channel.send({
       content: `<@&${process.env.DISCORD_MISSION_REVIEW_TEAM_ROLE_ID}>, a mission review has been requested.`,
@@ -128,7 +126,7 @@ export class MissionsController {
   async new_history(@Body() body): Promise<object> {
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
-      process.env.DISCORD_BOT_CHANNEL,
+      process.env.DISCORD_BOT_AAR_CHANNEL,
     ) as TextChannel;
 
     const leadersDescriptionText = body.leaders
@@ -175,7 +173,7 @@ export class MissionsController {
   async first_vote(@Body() body): Promise<object> {
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
-      process.env.DISCORD_BOT_CHANNEL,
+      process.env.DISCORD_VOTING_CHANNEL,
     ) as TextChannel;
 
     const newMissionEmbed = new MessageEmbed()
