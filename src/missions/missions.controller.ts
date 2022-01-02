@@ -39,7 +39,7 @@ export class MissionsController {
         },
       )
       .setTimestamp()
-      .setURL(`https://globalconflicts.net/mission/${body.uniqueName}`);
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
       process.env.DISCORD_BOT_CHANNEL,
@@ -56,7 +56,7 @@ export class MissionsController {
       .setAuthor(`Author: ${body.author}`, body.displayAvatarURL)
       .setDescription(`Version: ${body.version}.`)
       .setTimestamp()
-      .setURL(`https://globalconflicts.net/mission/${body.uniqueName}`);
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
 
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
@@ -95,7 +95,7 @@ export class MissionsController {
 		`,
       )
       .setTimestamp()
-      .setURL(`https://globalconflicts.net/mission-details/${body.uniqueName}`);
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
 
     if (body.reviewState === REVIEW_STATE_REPROVED) {
       for (const checklistElement of body.checklist) {
@@ -152,10 +152,9 @@ export class MissionsController {
 
     const gameplayHistoryEmbed = new MessageEmbed()
       .setTitle(`${body.name}`)
-
       .setAuthor(`Author: ${body.author}`, body.displayAvatarURL)
       .addField('Outcome:', body.outcome)
-      .setURL(`https://globalconflicts.net/mission-details/${body.uniqueName}`);
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
 
     if (body.gmNote) {
       gameplayHistoryEmbed.addField('GM Notes:', body.gmNote);
@@ -199,6 +198,55 @@ export class MissionsController {
       components: [row],
     });
 
+    return;
+  }
+
+  @Post('/bugreport')
+  async bugreport(@Body() body): Promise<object> {
+    const embed = new MessageEmbed()
+      .setColor('#ff0000')
+      .setTitle(`Mission: ${body.name}`)
+      .setAuthor(
+        `Bug report author: ${body.reportAuthor}`,
+        body.reviewDisplayAvatarURL,
+      )
+      .addFields({ name: 'Version:', value: body.version, inline: false })
+      .addFields({ name: 'Bug report:', value: body.report, inline: false })
+      .setTimestamp()
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
+
+    const discordClient = this.discordProvider.getClient();
+    const channel: TextChannel = discordClient.channels.cache.get(
+      process.env.DISCORD_BOT_CHANNEL,
+    ) as TextChannel;
+    await channel.send({
+      content: `New bug report added, <@${body.authorId}>.`,
+      embeds: [embed],
+    });
+    return;
+  }
+
+  @Post('/review')
+  async review(@Body() body): Promise<object> {
+    const embed = new MessageEmbed()
+      .setColor('#ff0000')
+      .setTitle(`Mission: ${body.name}`)
+      .setAuthor(
+        `Review author: ${body.reviewAuthor}`,
+        body.reviewDisplayAvatarURL,
+      )
+      .addFields({ name: 'Review:', value: body.review, inline: false })
+      .setTimestamp()
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
+
+    const discordClient = this.discordProvider.getClient();
+    const channel: TextChannel = discordClient.channels.cache.get(
+      process.env.DISCORD_BOT_CHANNEL,
+    ) as TextChannel;
+    await channel.send({
+      content: `New review added,  <@${body.authorId}>.`,
+      embeds: [embed],
+    });
     return;
   }
 }
