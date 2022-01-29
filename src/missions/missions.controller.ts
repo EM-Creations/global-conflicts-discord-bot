@@ -252,6 +252,7 @@ export class MissionsController {
 
   @Post('/media_posted')
   async media_posted(@Body() body): Promise<object> {
+    console.log('POSTING MEDIA');
     const embed = new MessageEmbed()
       .setColor('#0000FF')
       .setTitle(`Mission: ${body.name}`)
