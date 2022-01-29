@@ -249,4 +249,33 @@ export class MissionsController {
     });
     return;
   }
+
+  @Post('/media_posted')
+  async media_posted(@Body() body): Promise<object> {
+    const embed = new MessageEmbed()
+      .setColor('#0000FF')
+      .setTitle(`Mission: ${body.name}`)
+      .setDescription('New media posted!')
+      .setAuthor(
+        `Media poster: ${body.mediaAuthor}`,
+        body.mediaDisplayAvatarURL,
+      )
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
+
+    const discordClient = this.discordProvider.getClient();
+    const channel: TextChannel = discordClient.channels.cache.get(
+      process.env.ARMA_MEDIA_CHANNEL,
+    ) as TextChannel;
+    await channel.send({
+      embeds: [embed],
+    });
+    let linksText = '';
+    for (const link of body.mediaLinkList) {
+      linksText = `${linksText}\n${link.link}`;
+    }
+    await channel.send({
+      content: linksText,
+    });
+    return;
+  }
 }
