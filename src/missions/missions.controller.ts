@@ -267,11 +267,15 @@ export class MissionsController {
     const channel: TextChannel = discordClient.channels.cache.get(
       process.env.ARMA_MEDIA_CHANNEL,
     ) as TextChannel;
-
     await channel.send({
       embeds: [embed],
-      files: body.mediaLinkList.map((x) => x.link),
     });
+
+    for (const link of body.mediaLinkList) {
+      await channel.send({
+        content: link.link,
+      });
+    }
 
     return;
   }
