@@ -99,7 +99,10 @@ export class BotGateway {
       await MayPostTeamspeakViewer(discordClient);
       return;
     }
-    await this.startTyping();
+
+    try {
+      armaPingChannel.sendTyping();
+    } catch (error) {}
 
     const messageId = Settings.get().messageId;
     const query = await this.query;
@@ -210,21 +213,6 @@ export class BotGateway {
     }
   }
 
-  public startTyping(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const discordClient = this.discordProvider.getClient();
-      const armaPingChannel: TextChannel = discordClient.channels.cache.get(
-        process.env.ARMA_PINGS_CHANNEL_ID,
-      ) as TextChannel;
-
-      if (armaPingChannel) {
-        resolve(armaPingChannel.sendTyping());
-      } else {
-        reject('Channel does not exist.');
-      }
-    });
-  }
-
   private async removeErrorMessage(channel: TextChannel) {
     const errorMessageId = Settings.get().errorMessageId;
     if (errorMessageId) {
@@ -257,7 +245,14 @@ export class BotGateway {
             );
             if (this.refreshFails >= this.maxRefreshFails) {
               this.refreshFails = 0;
-              this.startTyping();
+              try {
+                const discordClient = this.discordProvider.getClient();
+                const armaPingChannel: TextChannel =
+                  discordClient.channels.cache.get(
+                    process.env.ARMA_PINGS_CHANNEL_ID,
+                  ) as TextChannel;
+                armaPingChannel.sendTyping();
+              } catch (error) {}
               console.error('Failed to refresh server info, emitting error.');
               resolve(undefined);
             }
