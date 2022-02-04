@@ -200,10 +200,12 @@ export class BotGateway {
               new Date(settings.lastPingMessageTime),
             ) >= parseInt(process.env.TIMEOUT_BETWEEN_PLAYER_PINGS_IN_MINUTES)
           ) {
-            const message = await armaPingChannel.messages.fetch(
-              settings.pingMessageId,
-            );
-            await message.delete();
+            try {
+              const message = await armaPingChannel.messages.fetch(
+                settings.pingMessageId,
+              );
+              await message.delete();
+            } catch (error) {}
 
             Settings.set('pingMessageId', undefined);
           }

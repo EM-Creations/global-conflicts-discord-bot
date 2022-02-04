@@ -70,7 +70,7 @@ export class MissionsController {
   }
 
   @Post('/audit_submited')
-  async audit_submited(@Body() body): Promise<object> {
+  async auditSubmited(@Body() body): Promise<object> {
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
       process.env.DISCORD_BOT_CHANNEL,
@@ -123,7 +123,7 @@ export class MissionsController {
   }
 
   @Post('/new_history')
-  async new_history(@Body() body): Promise<object> {
+  async new_Hhistory(@Body() body): Promise<object> {
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
       process.env.DISCORD_BOT_AAR_CHANNEL,
@@ -169,7 +169,7 @@ export class MissionsController {
   }
 
   @Post('/first_vote')
-  async first_vote(@Body() body): Promise<object> {
+  async firstVote(@Body() body): Promise<object> {
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
       process.env.DISCORD_VOTING_CHANNEL,
@@ -250,8 +250,29 @@ export class MissionsController {
     return;
   }
 
+  @Post('/aar')
+  async aar(@Body() body): Promise<object> {
+    const embed = new MessageEmbed()
+      .setColor('#ff0000')
+      .setTitle(`Mission: ${body.name}`)
+      .setAuthor(`AAR author: ${body.aarAuthor}`, body.aarDisplayAvatarURL)
+      .addFields({ name: 'AAR:', value: body.aar, inline: false })
+      .setTimestamp()
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
+
+    const discordClient = this.discordProvider.getClient();
+    const channel: TextChannel = discordClient.channels.cache.get(
+      process.env.DISCORD_BOT_CHANNEL,
+    ) as TextChannel;
+    await channel.send({
+      content: `An AAR was posted about your mission, <@${body.authorId}>.`,
+      embeds: [embed],
+    });
+    return;
+  }
+
   @Post('/media_posted')
-  async media_posted(@Body() body): Promise<object> {
+  async mediaPosted(@Body() body): Promise<object> {
     console.log('POSTING MEDIA');
     const embed = new MessageEmbed()
       .setColor('#0000FF')
