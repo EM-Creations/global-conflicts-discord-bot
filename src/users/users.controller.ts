@@ -40,17 +40,20 @@ export class UsersController {
     await gcGuild.members.fetch();
     const userFound = gcGuild.members.cache.get(params.id);
 
-    userFound['rolesMap'] = [];
-    userFound.roles.cache
-      .filter((value) => value.name != '@everyone')
-      .forEach(function (value) {
-        userFound['rolesMap'].push({
-          id: value.id,
-          name: value.name,
-          color: value.hexColor,
+    if (userFound) {
+      userFound['rolesMap'] = [];
+      userFound.roles.cache
+        .filter((value) => value.name != '@everyone')
+        .forEach(function (value) {
+          userFound['rolesMap'].push({
+            id: value.id,
+            name: value.name,
+            color: value.hexColor,
+          });
         });
-      });
-
-    return userFound;
+      return userFound;
+    } else {
+      return {};
+    }
   }
 }
