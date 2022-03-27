@@ -300,4 +300,18 @@ export class MissionsController {
 
     return;
   }
+
+  @Post('/youtube_video_uploaded')
+  async youtubeVideoUploaded(@Body() body): Promise<object> {
+    const discordClient = this.discordProvider.getClient();
+    const channel: TextChannel = discordClient.channels.cache.get(
+      process.env.PR_VIDEO_VERIFICATION_CHANNEL_ID,
+    ) as TextChannel;
+    await channel.send({
+      content: `
+      <@${body.authorId}> uploaded:\nDesired Title: ${body.title}\n${body.link}`,
+    });
+
+    return;
+  }
 }
