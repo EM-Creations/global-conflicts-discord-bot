@@ -14,7 +14,7 @@ import {
 import { spawn } from 'child_process';
 
 @Command({
-  name: 'tests',
+  name: 'testr',
   description: 'Restarts the test server.(Starts if it is offline)',
 })
 @UsePipes(TransformPipe)
