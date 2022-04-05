@@ -15,7 +15,7 @@ import { spawn } from 'child_process';
 
 @Command({
   name: 'testr',
-  description: 'Restarts the test server.(Starts if it is offline)',
+  description: "Restarts the test server. Starts if it's offline.",
 })
 @UsePipes(TransformPipe)
 export class RestartTestServerCommand
@@ -52,7 +52,9 @@ export class RestartTestServerCommand
       process.env.DISCORD_BOT_ADMIN_CHANNEL,
     ) as TextChannel;
 
-    const child = spawn('powershell.exe', ['c:\\ArmAServers\\test.ps1']);
+    const child = spawn('powershell.exe', [
+      'c:\\ArmAServers\\TrackHeadlessTest.ps1',
+    ]);
     child.stdout.on('data', async function (data) {
       try {
         if ('' + data) {

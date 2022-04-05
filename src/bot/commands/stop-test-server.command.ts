@@ -46,7 +46,7 @@ export class StopTestServerCommand implements DiscordTransformedCommand<any> {
       process.env.DISCORD_BOT_ADMIN_CHANNEL,
     ) as TextChannel;
 
-    const child = spawn('powershell.exe', ['c:\\ArmAServers\\stop.ps1']);
+    const child = spawn('powershell.exe', ['c:\\ArmAServers\\StopTest.ps1']);
     child.stdout.on('data', async function (data) {
       try {
         await interaction.channel.send('' + data);
