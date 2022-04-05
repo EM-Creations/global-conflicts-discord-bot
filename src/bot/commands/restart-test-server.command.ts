@@ -57,8 +57,9 @@ export class RestartTestServerCommand
     ]);
     child.stdout.on('data', async function (data) {
       try {
-        if ('' + data) {
-          await interaction.channel.send('' + data);
+        const text = '' + data;
+        if (text.includes('->')) {
+          await interaction.channel.send(text.replace('->', ''));
         }
       } catch (e) {
         console.log(e);
@@ -67,6 +68,10 @@ export class RestartTestServerCommand
 
     child.stderr.on('data', async function (data) {
       try {
+        const text = '' + data;
+        if (text.includes('->')) {
+          await interaction.channel.send(text.replace('->', ''));
+        }
         await interaction.channel.send('An error happened!');
         await adminChannel.send('' + data);
       } catch (e) {

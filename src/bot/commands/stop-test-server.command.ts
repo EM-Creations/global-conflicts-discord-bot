@@ -49,7 +49,10 @@ export class StopTestServerCommand implements DiscordTransformedCommand<any> {
     const child = spawn('powershell.exe', ['c:\\ArmAServers\\StopTest.ps1']);
     child.stdout.on('data', async function (data) {
       try {
-        await interaction.channel.send('' + data);
+        const text = '' + data;
+        if (text.includes('->')) {
+          await interaction.channel.send(text.replace('->', ''));
+        }
       } catch (e) {
         console.log(e);
       }
@@ -58,8 +61,12 @@ export class StopTestServerCommand implements DiscordTransformedCommand<any> {
     child.stderr.on('data', async function (data) {
       await interaction.channel.send('An error happened!');
       try {
+        const text = '' + data;
         await interaction.channel.send('An error happened!');
-        await adminChannel.send('' + data);
+        if (text.includes('->')) {
+          await interaction.channel.send(text.replace('->', ''));
+        }
+        await adminChannel.send(text);
       } catch (e) {
         console.log(e);
       }
