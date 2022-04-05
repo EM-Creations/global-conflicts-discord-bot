@@ -87,7 +87,7 @@ export class BotGateway {
   }
 
   async startPolling(forceNewMessage = false) {
-    console.log('startPolling');
+ 
     const discordClient = this.discordProvider.getClient();
 
     const armaPingChannel: TextChannel = discordClient.channels.cache.get(
