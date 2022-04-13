@@ -294,7 +294,7 @@ export class MissionsController {
 
     for (const link of body.mediaLinkList) {
       await channel.send({
-        content: link.cdnLink ?? link.link,
+        content: link.link ?? link.cdnLink,
       });
     }
 
