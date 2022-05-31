@@ -24,18 +24,7 @@ import { ApplicationCommandPermissionTypes } from 'discord.js/typings/enums';
             removeCommandsBefore: true,
           },
         ],
-        slashCommandsPermissions: [
-          {
-            commandClassType: RestartTestServerCommand,
-            permissions: [
-              {
-                id: configService.get('DISCORD_MISSION_MAKER_ID'),
-                type: ApplicationCommandPermissionTypes.ROLE,
-                permission: true,
-              },
-            ],
-          },
-        ],
+
         discordClientOptions: {
           intents: [
             Intents.FLAGS.GUILDS,
