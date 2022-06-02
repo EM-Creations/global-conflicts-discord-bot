@@ -276,13 +276,16 @@ export class MissionsController {
     console.log('POSTING MEDIA');
     const embed = new MessageEmbed()
       .setColor('#0000FF')
-      .setTitle(`Mission: ${body.name}`)
       .setDescription('New media posted!')
-      .setAuthor(
-        `Media poster: ${body.mediaAuthor}`,
-        body.mediaDisplayAvatarURL,
-      )
-      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
+      .setAuthor({
+        name: `Media poster: ${body.mediaAuthor}`,
+        iconURL: body.mediaDisplayAvatarURL,
+      });
+
+    if (body.name) {
+      embed.setTitle(`Mission: ${body.name}`);
+      embed.setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
+    }
 
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
