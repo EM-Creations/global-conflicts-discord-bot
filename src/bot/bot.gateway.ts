@@ -87,7 +87,6 @@ export class BotGateway {
   }
 
   async startPolling(forceNewMessage = false) {
- 
     const discordClient = this.discordProvider.getClient();
 
     const armaPingChannel: TextChannel = discordClient.channels.cache.get(
@@ -99,10 +98,6 @@ export class BotGateway {
       await MayPostTeamspeakViewer(discordClient);
       return;
     }
-
-    try {
-      armaPingChannel.sendTyping();
-    } catch (error) {}
 
     const messageId = Settings.get().messageId;
     const query = await this.query;
@@ -253,7 +248,6 @@ export class BotGateway {
                   discordClient.channels.cache.get(
                     process.env.ARMA_PINGS_CHANNEL_ID,
                   ) as TextChannel;
-                armaPingChannel.sendTyping();
               } catch (error) {}
               console.error('Failed to refresh server info, emitting error.');
               resolve(undefined);
