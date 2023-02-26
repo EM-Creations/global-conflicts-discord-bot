@@ -171,7 +171,7 @@ export class BotGateway {
           armaPingChannel
             .send(
               this.generatePing(process.env.ARMA_PINGS_ROLE_ID) +
-              ` ${minPlayers} ${locale.pingMessage}`,
+                ` ${minPlayers} ${locale.pingMessage}`,
             )
             .then((newMessage) => {
               Settings.set('pingMessageId', newMessage.id);
@@ -345,50 +345,94 @@ export class BotGateway {
           //console.log(`missionSlots:  ${missionSlots}`);
           //console.log(`missionName:  ${missionName}`);
         }
+        playerListData.push('```');
+        return [
+          {
+            inline: false,
+            name: locale.statuses.status,
+            value: locale.statuses.online,
+          },
+          {
+            inline: true,
+            name: 'Mission Type',
+            value: missionType,
+          },
+          {
+            inline: true,
+            name: locale.mission,
+            value: missionName,
+          },
+          {
+            inline: true,
+            name: '\u200b',
+            value: '\u200b',
+          },
+          {
+            inline: true,
+            name: locale.playerCount,
+            value: `${query.players.length}/${missionSlots}`,
+          },
+          {
+            inline: true,
+            name: locale.map,
+            value: query.map ? query.map : locale.noMap,
+          },
+          {
+            inline: true,
+            name: '\u200b',
+            value: '\u200b',
+          },
+          {
+            inline: false,
+            name: locale.playerList,
+            value: playerListData.join('\n'),
+          },
+        ];
+      } else {
+        playerListData.push('```');
+        return [
+          {
+            inline: false,
+            name: locale.statuses.status,
+            value: locale.statuses.online,
+          },
+          {
+            inline: true,
+            name: 'Mission Type',
+            value: "Custom",
+          },
+          {
+            inline: true,
+            name: locale.mission,
+            value: query.raw.game,
+          },
+          {
+            inline: true,
+            name: '\u200b',
+            value: '\u200b',
+          },
+          {
+            inline: true,
+            name: locale.playerCount,
+            value: `${query.players.length}/${query.maxplayers}`,
+          },
+          {
+            inline: true,
+            name: locale.map,
+            value: query.map ? query.map : locale.noMap,
+          },
+          {
+            inline: true,
+            name: '\u200b',
+            value: '\u200b',
+          },
+          {
+            inline: false,
+            name: locale.playerList,
+            value: playerListData.join('\n'),
+          },
+        ];
       }
-      playerListData.push('```');
-      return [
-        {
-          inline: false,
-          name: locale.statuses.status,
-          value: locale.statuses.online,
-        },
-        {
-          inline: true,
-          name: 'Mission Type',
-          value: missionType,
-        },
-        {
-          inline: true,
-          name: locale.mission,
-          value: missionName,
-        },
-        {
-          inline: true,
-          name: '\u200b',
-          value: '\u200b',
-        },
-        {
-          inline: true,
-          name: locale.playerCount,
-          value: `${query.players.length}/${missionSlots}`,
-        },
-        {
-          inline: true,
-          name: locale.map,
-          value: query.map ? query.map : locale.noMap,
-        },
-        {
-          inline: true,
-          name: '\u200b',
-          value: '\u200b',
-        },
-        {
-          inline: false,
-          name: locale.playerList,
-          value: playerListData.join('\n'),
-        },
-      ];
     }
   }
 
@@ -498,6 +542,7 @@ export class BotGateway {
 
         let missionName = 'undefined';
         let missionSlots = '64';
+        let name = `Unknown mission on ${query.map}`;
         if (missionType !== 'undefined') {
           const missionSlotsSearch = gameName.match(/[A-z]+([0-9]+)/);
           if (missionSlotsSearch && typeLength) {
@@ -510,12 +555,13 @@ export class BotGateway {
               ? missionNameSearch[0].replace(/_/g, ' ')
               : 'undefined';
           }
+          name = `${missionType} - ${missionName} on ${query.map} (${query.players.length}/${missionSlots})`;
+        } else {
+          name = `${query.raw.game} on ${query.map} (${query.players.length}/${query.maxplayers})`;
         }
 
-        let name = `${missionType} - ${missionName} on ${query.map} (${query.players.length}/${missionSlots})`;
-
         if (!query.map) {
-          name = `${locale.noMap} (${query.players.length}/${missionSlots})`;
+          name = `${locale.noMap} (${query.players.length}/${query.maxplayers})`;
         }
 
         _client.user.setPresence({
