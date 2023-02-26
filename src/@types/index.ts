@@ -5,8 +5,12 @@ declare module 'gamedig' {
 
   export interface Player {
     name: string;
-    score: number;
+    raw: PlayerRaw;
+  }
+
+  export interface PlayerRaw {
     time: number;
+    score: number;
   }
 
   export interface QueryOptions {
