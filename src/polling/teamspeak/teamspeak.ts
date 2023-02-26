@@ -1,4 +1,4 @@
-import { MessageAttachment, MessageEmbed, TextChannel } from 'discord.js';
+import {   AttachmentBuilder, EmbedBuilder, TextChannel } from 'discord.js';
 import Time from '../../helpers/time';
 import Settings from './settings';
 
@@ -20,7 +20,7 @@ export default async function MayPostTeamspeakViewer(discordClient) {
     if (fs.existsSync(`${os.tmpdir()}/screenshot.png`)) {
       // If an embed was already posted
 
-      const embed = new MessageEmbed()
+      const embed = new EmbedBuilder()
         .setColor(COLOR_OK)
         .setTitle(`TS3`)
         .setDescription('TS3 Viewer')
@@ -28,7 +28,7 @@ export default async function MayPostTeamspeakViewer(discordClient) {
           'https://globalconflicts.net/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbanner.8d01371c.png&w=1080&q=100',
         );
 
-      const file = new MessageAttachment(`${os.tmpdir()}/screenshot.png`);
+      const file = new AttachmentBuilder(`${os.tmpdir()}/screenshot.png`);
       embed.setImage(`attachment://screenshot.png`);
 
       let ts3messageId = '';
@@ -67,7 +67,7 @@ export default async function MayPostTeamspeakViewer(discordClient) {
 }
 
 function postMessageTS3(
-  content: MessageEmbed | string,
+  content: EmbedBuilder | string,
   file,
   ts3channel,
 ): Promise<string> {

@@ -1,7 +1,7 @@
 import { DiscordClientProvider, On, Once } from '@discord-nestjs/core';
 import { Injectable, Logger } from '@nestjs/common';
 
-import { Interaction, MessageEmbed, TextChannel } from 'discord.js';
+import { ActivityType, EmbedBuilder, Interaction, TextChannel } from 'discord.js';
 import { Player, QueryResult } from 'gamedig';
 import * as mongo from 'mongodb';
 import { InjectDb } from 'nest-mongodb';
@@ -22,7 +22,7 @@ export class BotGateway {
   constructor(
     private readonly discordProvider: DiscordClientProvider,
     @InjectDb() private readonly db: mongo.Db,
-  ) {}
+  ) { }
 
   @Once('ready')
   onReady(): void {
@@ -200,7 +200,7 @@ export class BotGateway {
                 settings.pingMessageId,
               );
               await message.delete();
-            } catch (error) {}
+            } catch (error) { }
 
             Settings.set('pingMessageId', undefined);
           }
@@ -248,7 +248,7 @@ export class BotGateway {
                   discordClient.channels.cache.get(
                     process.env.ARMA_PINGS_CHANNEL_ID,
                   ) as TextChannel;
-              } catch (error) {}
+              } catch (error) { }
               console.error('Failed to refresh server info, emitting error.');
               resolve(undefined);
             }
@@ -345,50 +345,94 @@ export class BotGateway {
           //console.log(`missionSlots:  ${missionSlots}`);
           //console.log(`missionName:  ${missionName}`);
         }
+        playerListData.push('```');
+        return [
+          {
+            inline: false,
+            name: locale.statuses.status,
+            value: locale.statuses.online,
+          },
+          {
+            inline: true,
+            name: 'Mission Type',
+            value: missionType,
+          },
+          {
+            inline: true,
+            name: locale.mission,
+            value: missionName,
+          },
+          {
+            inline: true,
+            name: '\u200b',
+            value: '\u200b',
+          },
+          {
+            inline: true,
+            name: locale.playerCount,
+            value: `${query.players.length}/${missionSlots}`,
+          },
+          {
+            inline: true,
+            name: locale.map,
+            value: query.map ? query.map : locale.noMap,
+          },
+          {
+            inline: true,
+            name: '\u200b',
+            value: '\u200b',
+          },
+          {
+            inline: false,
+            name: locale.playerList,
+            value: playerListData.join('\n'),
+          },
+        ];
+      } else {
+        playerListData.push('```');
+        return [
+          {
+            inline: false,
+            name: locale.statuses.status,
+            value: locale.statuses.online,
+          },
+          {
+            inline: true,
+            name: 'Mission Type',
+            value: "Custom",
+          },
+          {
+            inline: true,
+            name: locale.mission,
+            value: query.raw.game,
+          },
+          {
+            inline: true,
+            name: '\u200b',
+            value: '\u200b',
+          },
+          {
+            inline: true,
+            name: locale.playerCount,
+            value: `${query.players.length}/${query.maxplayers}`,
+          },
+          {
+            inline: true,
+            name: locale.map,
+            value: query.map ? query.map : locale.noMap,
+          },
+          {
+            inline: true,
+            name: '\u200b',
+            value: '\u200b',
+          },
+          {
+            inline: false,
+            name: locale.playerList,
+            value: playerListData.join('\n'),
+          },
+        ];
       }
-      playerListData.push('```');
-      return [
-        {
-          inline: false,
-          name: locale.statuses.status,
-          value: locale.statuses.online,
-        },
-        {
-          inline: true,
-          name: 'Mission Type',
-          value: missionType,
-        },
-        {
-          inline: true,
-          name: locale.mission,
-          value: missionName,
-        },
-        {
-          inline: true,
-          name: '\u200b',
-          value: '\u200b',
-        },
-        {
-          inline: true,
-          name: locale.playerCount,
-          value: `${query.players.length}/${missionSlots}`,
-        },
-        {
-          inline: true,
-          name: locale.map,
-          value: query.map ? query.map : locale.noMap,
-        },
-        {
-          inline: true,
-          name: '\u200b',
-          value: '\u200b',
-        },
-        {
-          inline: false,
-          name: locale.playerList,
-          value: playerListData.join('\n'),
-        },
-      ];
     }
   }
 
@@ -430,7 +474,7 @@ export class BotGateway {
 
   public async createRichEmbed(query?: QueryResult, maintenanceMode?: boolean) {
     if (query) {
-      return new MessageEmbed({
+      return new EmbedBuilder({
         color: COLOR_OK,
         // As the ─ is just a little larger than the actual letters, it isn't equal to the letter count
         description: this.getDescriptionRepeater(query.name),
@@ -443,7 +487,7 @@ export class BotGateway {
         title: locale.serverName,
       });
     } else if (maintenanceMode) {
-      return new MessageEmbed({
+      return new EmbedBuilder({
         color: COLOR_MAINTENANCE,
         description: locale.serverDownForMaintenance,
         fields: this.getMaintenanceFields(),
@@ -451,7 +495,7 @@ export class BotGateway {
         title: locale.serverDownForMaintenance,
       });
     } else {
-      return new MessageEmbed({
+      return new EmbedBuilder({
         color: COLOR_ERROR,
         description: locale.serverOffline,
         fields: this.getErrorFields(),
@@ -498,6 +542,7 @@ export class BotGateway {
 
         let missionName = 'undefined';
         let missionSlots = '64';
+        let name = `Unknown mission on ${query.map}`;
         if (missionType !== 'undefined') {
           const missionSlotsSearch = gameName.match(/[A-z]+([0-9]+)/);
           if (missionSlotsSearch && typeLength) {
@@ -510,12 +555,13 @@ export class BotGateway {
               ? missionNameSearch[0].replace(/_/g, ' ')
               : 'undefined';
           }
+          name = `${missionType} - ${missionName} on ${query.map} (${query.players.length}/${missionSlots})`;
+        } else {
+          name = `${query.raw.game} on ${query.map} (${query.players.length}/${query.maxplayers})`;
         }
 
-        let name = `${missionType} - ${missionName} on ${query.map} (${query.players.length}/${missionSlots})`;
-
         if (!query.map) {
-          name = `${locale.noMap} (${query.players.length}/${missionSlots})`;
+          name = `${locale.noMap} (${query.players.length}/${query.maxplayers})`;
         }
 
         _client.user.setPresence({
@@ -523,7 +569,7 @@ export class BotGateway {
           activities: [
             {
               name,
-              type: 'PLAYING',
+              type: ActivityType.Playing
             },
           ],
         });
@@ -535,7 +581,7 @@ export class BotGateway {
           activities: [
             {
               name,
-              type: 'PLAYING',
+              type: ActivityType.Playing
             },
           ],
         });
@@ -546,7 +592,7 @@ export class BotGateway {
         activities: [
           {
             name: locale.presence.error,
-            type: 'WATCHING',
+            type: ActivityType.Watching
           },
         ],
       });
@@ -556,7 +602,7 @@ export class BotGateway {
         activities: [
           {
             name: locale.presence.maintenance,
-            type: 'WATCHING',
+            type: ActivityType.Watching
           },
         ],
       });
@@ -566,7 +612,7 @@ export class BotGateway {
         activities: [
           {
             name: locale.presence.botFailure,
-            type: 'STREAMING',
+            type: ActivityType.Streaming
           },
         ],
       });
