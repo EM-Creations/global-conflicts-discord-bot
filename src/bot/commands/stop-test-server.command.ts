@@ -1,11 +1,11 @@
-import { TransformPipe } from '@discord-nestjs/common';
+
 import {
-  Command,
-  DiscordClientProvider,
-  DiscordTransformedCommand,
-  UsePipes,
+  Command, DiscordClientProvider, EventParams, Handler,
+
+
 } from '@discord-nestjs/core';
 import {
+  ClientEvents,
   CommandInteraction,
   GuildMemberRoleManager,
   TextChannel,
@@ -18,12 +18,21 @@ import { spawn } from 'child_process';
   description:
     'Stops the test server. Use this if you need to remove missions from it.',
 })
-@UsePipes(TransformPipe)
-export class StopTestServerCommand implements DiscordTransformedCommand<any> {
-  constructor(private readonly discordProvider: DiscordClientProvider) {}
+export class StopTestServerCommand {
 
-  async handler(interaction: CommandInteraction) {
-    const userRoleManager: GuildMemberRoleManager = interaction.member
+  constructor(private readonly discordProvider: DiscordClientProvider) { }
+
+  @Handler()
+  onPlayCommand(
+    @EventParams() args: ClientEvents['interactionCreate'],
+  ): string {
+
+
+    const member = args[0].member;
+    const channel = args[0].channel;
+
+
+    const userRoleManager: GuildMemberRoleManager = member
       .roles as GuildMemberRoleManager;
 
     const isAdmin = userRoleManager.cache.some(
@@ -51,7 +60,7 @@ export class StopTestServerCommand implements DiscordTransformedCommand<any> {
       try {
         const text = '' + data;
         if (text.includes('->')) {
-          await interaction.channel.send(text.replace('->', ''));
+          await channel.send(text.replace('->', ''));
         }
       } catch (e) {
         console.log(e);
@@ -59,12 +68,12 @@ export class StopTestServerCommand implements DiscordTransformedCommand<any> {
     });
 
     child.stderr.on('data', async function (data) {
-      await interaction.channel.send('An error happened!');
+      await channel.send('An error happened!');
       try {
         const text = '' + data;
-        await interaction.channel.send('An error happened!');
+        await channel.send('An error happened!');
         if (text.includes('->')) {
-          await interaction.channel.send(text.replace('->', ''));
+          await channel.send(text.replace('->', ''));
         }
         await adminChannel.send(text);
       } catch (e) {
@@ -74,5 +83,7 @@ export class StopTestServerCommand implements DiscordTransformedCommand<any> {
 
     child.stdin.end();
     return 'Stopping Test server...';
+
   }
 }
+

@@ -1,32 +1,45 @@
-import { TransformPipe } from '@discord-nestjs/common';
+
 import {
   Command,
   DiscordClientProvider,
-  DiscordTransformedCommand,
-  UsePipes,
+  EventParams,
+  Handler,
+  InteractionEvent,
+
 } from '@discord-nestjs/core';
 import {
+  ClientEvents,
   CommandInteraction,
   GuildMemberRoleManager,
   TextChannel,
 } from 'discord.js';
 
 import { spawn } from 'child_process';
-
+ 
 @Command({
   name: 'testr',
   description: "Restarts the test server. Starts if it's offline.",
 })
-@UsePipes(TransformPipe)
-export class RestartTestServerCommand
-  implements DiscordTransformedCommand<any>
-{
+
+
+
+export class RestartTestServerCommand {
+
   constructor(private readonly discordProvider: DiscordClientProvider) {}
 
-  async handler(interaction: CommandInteraction) {
+  @Handler()
+  onPlayCommand(
+    @EventParams() args: ClientEvents['interactionCreate'],
+  ): string {
+
+
+    const member = args[0].member;
+    const channel = args[0].channel;
+
+
     const dayOfWeek = new Date().getDay();
     const isWeekend = dayOfWeek === 6 || dayOfWeek === 0;
-    const userRoleManager: GuildMemberRoleManager = interaction.member
+    const userRoleManager: GuildMemberRoleManager = member
       .roles as GuildMemberRoleManager;
 
     const isAdmin = userRoleManager.cache.some(
@@ -59,7 +72,7 @@ export class RestartTestServerCommand
       try {
         const text = '' + data;
         if (text.includes('->')) {
-          await interaction.channel.send(text.replace('->', ''));
+          await channel.send(text.replace('->', ''));
         }
       } catch (e) {
         console.log(e);
@@ -70,9 +83,9 @@ export class RestartTestServerCommand
       try {
         const text = '' + data;
         if (text.includes('->')) {
-          await interaction.channel.send(text.replace('->', ''));
+          await channel.send(text.replace('->', ''));
         }
-        await interaction.channel.send('An error happened!');
+        await channel.send('An error happened!');
         await adminChannel.send('' + data);
       } catch (e) {
         console.log(e);
@@ -81,5 +94,10 @@ export class RestartTestServerCommand
 
     child.stdin.end();
     return 'Restarting/Starting Test server...';
+
+
   }
 }
+
+
+

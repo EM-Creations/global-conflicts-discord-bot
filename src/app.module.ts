@@ -7,9 +7,8 @@ import { AppService } from './app.service';
 import { MissionsController } from './missions/missions.controller';
 import { MongoModule } from 'nest-mongodb';
 import { DiscordModule } from '@discord-nestjs/core';
-import { RestartTestServerCommand } from './bot/commands/restart-test-server.command';
-import { Intents } from 'discord.js';
-import { ApplicationCommandPermissionTypes } from 'discord.js/typings/enums';
+import { GatewayIntentBits } from 'discord.js';
+ 
 
 @Module({
   imports: [
@@ -27,9 +26,9 @@ import { ApplicationCommandPermissionTypes } from 'discord.js/typings/enums';
 
         discordClientOptions: {
           intents: [
-            Intents.FLAGS.GUILDS,
-            Intents.FLAGS.GUILD_MESSAGES,
-            Intents.FLAGS.GUILD_MEMBERS,
+            GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.GuildMembers
           ],
         },
       }),
