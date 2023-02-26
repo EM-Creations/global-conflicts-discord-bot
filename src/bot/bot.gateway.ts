@@ -619,7 +619,7 @@ export class BotGateway {
     }
   }
   private getPlayerDisplayText(player: Player): string {
-    return `• ${player.name} (${Time.secondsToHhMm(player.time)})`;
+    return `• ${player.name}`;
   }
 
   private getPlayerListCharacterCount(players: Player[]): number {

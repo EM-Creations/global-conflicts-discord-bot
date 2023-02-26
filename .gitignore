@@ -36,3 +36,4 @@ lerna-debug.log*
 .env
 bot_posts.json
 bot_posts.json
+.yarn/
