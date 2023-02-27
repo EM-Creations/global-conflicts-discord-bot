@@ -87,7 +87,7 @@ export class MissionsController {
     const channel: TextChannel = discordClient.channels.cache.get(
       process.env.DISCORD_BOT_CHANNEL,
     ) as TextChannel;
-    await channel.send({ content: `${body.author} updated a mission!`, embeds: [newMissionEmbed] });
+    await channel.send({ content: `${body.updateAuthor} updated a mission!`, embeds: [newMissionEmbed] });
     return;
   }
 
