@@ -65,7 +65,7 @@ export class MissionsController {
 
       .setColor('#ffffff')
       .setTitle(body.name)
-      .setAuthor({ name: `Author of the update: ${body.author}`, iconURL: body.displayAvatarURL })
+      .setAuthor({ name: `Mission Author: ${body.missionAuthor}`, iconURL: body.displayAvatarURL })
       .addFields(
         { name: 'Description:', value: body.description, inline: false },
         {
