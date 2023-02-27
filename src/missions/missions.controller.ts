@@ -60,12 +60,17 @@ export class MissionsController {
 
   @Post('/update')
   async update(@Body() body): Promise<object> {
-    console.log(body);
+    
+    const discordClient = this.discordProvider.getClient();
+    let missionAuthor = await discordClient.users.fetch(body.missionAuthor);
+    
+
+
     const newMissionEmbed = new EmbedBuilder()
 
       .setColor('#ffffff')
       .setTitle(body.name)
-      .setAuthor({ name: `Mission Author: @${body.missionAuthor}`, iconURL: body.displayAvatarURL })
+      .setAuthor({ name: `Mission Author: ${missionAuthor.username}`, iconURL: body.displayAvatarURL })
       .addFields(
         { name: 'Description:', value: body.description, inline: false },
         {
@@ -83,7 +88,8 @@ export class MissionsController {
       )
       .setTimestamp()
       .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
-    const discordClient = this.discordProvider.getClient();
+      
+
     const channel: TextChannel = discordClient.channels.cache.get(
       process.env.DISCORD_BOT_CHANNEL,
     ) as TextChannel;
