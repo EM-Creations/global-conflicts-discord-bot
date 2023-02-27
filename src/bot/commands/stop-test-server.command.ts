@@ -29,7 +29,7 @@ export class StopTestServerCommand {
 
 
     const member = args[0].member;
-    const channel = args[0].channel;
+    const channel = args[0].channel as TextChannel;
 
 
     const userRoleManager: GuildMemberRoleManager = member
