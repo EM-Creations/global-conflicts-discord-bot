@@ -6,6 +6,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
+  StringSelectMenuBuilder,
   TextChannel,
 } from 'discord.js';
 
@@ -60,10 +61,10 @@ export class MissionsController {
 
   @Post('/update')
   async update(@Body() body): Promise<object> {
-    
+
     const discordClient = this.discordProvider.getClient();
     let missionAuthor = await discordClient.users.fetch(body.missionAuthor);
-    
+
 
 
     const newMissionEmbed = new EmbedBuilder()
@@ -88,7 +89,7 @@ export class MissionsController {
       )
       .setTimestamp()
       .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
-      
+
 
     const channel: TextChannel = discordClient.channels.cache.get(
       process.env.DISCORD_BOT_CHANNEL,
@@ -176,7 +177,7 @@ export class MissionsController {
   async new_Hhistory(@Body() body): Promise<object> {
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
-      process.env.DISCORD_BOT_AAR_CHANNEL,
+      process.env.DISCORD_BOT_CHANNEL,
     ) as TextChannel;
 
     const leadersDescriptionText = body.leaders
@@ -213,8 +214,23 @@ export class MissionsController {
       gameplayHistoryEmbed.addFields({ name: 'AAR Replay:', value: body.aarReplayLink });
     }
     gameplayHistoryEmbed.addFields({ name: leaderText, value: leadersFieldText });
+    const discordButton = new ButtonBuilder()
+      .setLabel('Rate this mission')
+      .setCustomId(body.uniqueName)
+      .setStyle(ButtonStyle.Primary);
 
-    await channel.send({ content: sendText, embeds: [gameplayHistoryEmbed] });
+    const row = new ActionRowBuilder<ButtonBuilder>({ components: [discordButton] })
+
+    const messageSent = await channel.send({
+      content: sendText,
+
+      embeds: [gameplayHistoryEmbed],
+
+    });
+    await channel.send({
+      content: "If you played this mission, consider rating it:\nRate the mission, not the leadership!\nRatings are visible only to the mission maker and Admins/GMs",
+      components: [row]
+    })
     return;
   }
 

@@ -1,7 +1,7 @@
 import { DiscordClientProvider, On, Once } from '@discord-nestjs/core';
 import { Injectable, Logger } from '@nestjs/common';
 
-import { ActivityType, EmbedBuilder, Interaction, TextChannel } from 'discord.js';
+import { ActionRowBuilder, ActivityType, EmbedBuilder, Interaction, StringSelectMenuBuilder, TextChannel } from 'discord.js';
 import { Player, QueryResult } from 'gamedig';
 import * as mongo from 'mongodb';
 import { InjectDb } from 'nest-mongodb';
@@ -37,53 +37,162 @@ export class BotGateway {
 
   @On('interactionCreate')
   async onInteraction(interaction: Interaction): Promise<void> {
-    if (!interaction.isButton()) return;
+    if (interaction.channelId == process.env.DISCORD_VOTING_CHANNEL) {
+      if (!interaction.isButton()) return;
 
-    const uniqueName = interaction.customId;
-    const clicker = interaction.user;
-    //  this.db.collection("users")
+      const uniqueName = interaction.customId;
+      const clicker = interaction.user;
+      //  this.db.collection("users")
 
-    const voteCountResult = await this.db.collection('missions').count({
-      votes: clicker.id,
-    });
+      const voteCountResult = await this.db.collection('missions').count({
+        votes: clicker.id,
+      });
 
-    if (voteCountResult >= 4) {
+      if (voteCountResult >= 4) {
+        try {
+          await interaction.reply({
+            content: 'You already voted for 4 different missions.',
+            ephemeral: true,
+          });
+        } catch (error) {
+          console.error(error);
+        } finally {
+          return;
+        }
+      }
+      const updateResult = await this.db.collection('missions').updateOne(
+        { uniqueName: uniqueName },
+        {
+          $addToSet: {
+            votes: clicker.id,
+          },
+        },
+      );
       try {
-        await interaction.reply({
-          content: 'You already voted for 4 different missions.',
-          ephemeral: true,
-        });
+        if (updateResult.modifiedCount === 1) {
+          await interaction.reply({
+            content: 'Vote submitted!',
+            ephemeral: true,
+          });
+        } else {
+          await interaction.reply({
+            content: 'You already voted for this mission.',
+            ephemeral: true,
+          });
+        }
       } catch (error) {
         console.error(error);
       } finally {
         return;
       }
     }
-    const updateResult = await this.db.collection('missions').updateOne(
-      { uniqueName: uniqueName },
-      {
-        $addToSet: {
-          votes: clicker.id,
-        },
-      },
-    );
-    try {
-      if (updateResult.modifiedCount === 1) {
+    if (interaction.channelId == process.env.DISCORD_BOT_CHANNEL) {
+      if (interaction.isButton() && interaction.customId) {
+        const uniqueName = interaction.customId;
+        const clicker = interaction.user;
+
+
+        const isMissionMaker = await this.db.collection('missions').findOne({
+          uniqueName: uniqueName,
+          authorID: clicker.id,
+        })
+        if (isMissionMaker) {
+          await interaction.reply({
+            content: 'You can\'t rate your own mission. 🤓',
+            ephemeral: true,
+          });
+          return
+        }
+
+        const row = new ActionRowBuilder<StringSelectMenuBuilder>()
+          .addComponents(
+            new StringSelectMenuBuilder()
+              .setCustomId(uniqueName)
+              .setPlaceholder('Rate this mission:')
+              .addOptions(
+                {
+                  label: 'Good',
+                  description: 'The mission is well made and interesting.',
+                  emoji: "👍",
+                  value: 'positive',
+                },
+                {
+                  label: 'It\'s alright',
+                  description: 'Just a regular enjoyable mission.',
+                  emoji: "🆗",
+                  value: 'neutral',
+                },
+                {
+                  label: 'Bad',
+                  description: 'The mission has concept issues.',
+                  emoji: "👎",
+                  value: 'negative',
+                },
+              ),
+          );
+
         await interaction.reply({
-          content: 'Vote submitted!',
+          content: 'Submit your rating:',
           ephemeral: true,
-        });
-      } else {
-        await interaction.reply({
-          content: 'You already voted for this mission.',
-          ephemeral: true,
-        });
+          components: [row]
+        })
+
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      return;
+      if (interaction.isAnySelectMenu()) {
+        interaction.deferUpdate();
+        const uniqueName = interaction.customId;
+        const clicker = interaction.user;
+
+        const value = interaction["values"][0]
+        const rating = {
+          date: new Date(),
+          ratingAuthorId: clicker.id,
+          value: value,
+        };
+        const hasRating = await this.db.collection('missions').findOne(
+          {
+            uniqueName: uniqueName,
+            "ratings.ratingAuthorId": clicker.id
+          }
+        );
+
+        if (hasRating) {
+          await this.db.collection("missions").updateOne(
+            {
+              uniqueName: uniqueName,
+              "ratings.ratingAuthorId": clicker.id
+            }, {
+            $set: {
+              "ratings.$.value": value,
+              "ratings.$.date": new Date(),
+            }
+          }
+          );
+        } else {
+          await this.db.collection('missions').updateOne(
+            {
+              uniqueName: uniqueName
+            }, {
+            $addToSet: { ratings: rating }
+          }
+          );
+        }
+
+        if (value == "negative") {
+          await interaction.editReply({ content: "Rating submited! 📝 If you didn't enjoy this mission, consider writing a constructive review for the mission maker.", components: [] })
+        } else {
+          await interaction.editReply({
+            content: 'Thanks for your input!',
+            components: []
+
+          });
+
+        };
+      }
+
     }
+
+
   }
 
   async startPolling(forceNewMessage = false) {
@@ -171,7 +280,7 @@ export class BotGateway {
           armaPingChannel
             .send(
               this.generatePing(process.env.ARMA_PINGS_ROLE_ID) +
-                ` ${minPlayers} ${locale.pingMessage}`,
+              ` ${minPlayers} ${locale.pingMessage}`,
             )
             .then((newMessage) => {
               Settings.set('pingMessageId', newMessage.id);
