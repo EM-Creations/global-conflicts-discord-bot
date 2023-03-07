@@ -92,17 +92,28 @@ export class BotGateway {
         const clicker = interaction.user;
 
 
-        const isMissionMaker = await this.db.collection('missions').findOne({
+        const missionFound = await this.db.collection('missions').findOne({
           uniqueName: uniqueName,
           authorID: clicker.id,
         })
-        if (isMissionMaker) {
+        if (missionFound) {
           await interaction.reply({
             content: 'You can\'t rate your own mission. 🤓',
             ephemeral: true,
           });
-          return
+          return;
         }
+        if(!missionFound.history){
+          await interaction.reply({
+            content: 'You can\'t rate a mission that hasn\'t been played yet.',
+            ephemeral: true,
+          });
+          return;
+        }
+
+       
+
+
 
         const row = new ActionRowBuilder<StringSelectMenuBuilder>()
           .addComponents(

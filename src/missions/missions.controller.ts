@@ -262,7 +262,6 @@ export class MissionsController {
       content: `This mission has received its first vote:`,
       embeds: [newMissionEmbed],
       components: [row]
-
     });
 
     return;
