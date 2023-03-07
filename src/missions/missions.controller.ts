@@ -249,7 +249,7 @@ export class MissionsController {
         { name: 'Type:', value: body.type, inline: true },
         { name: 'Terrain:', value: body.terrain, inline: true },
       )
-      .setURL(`https://globalconflicts.net/mission-details/${body.uniqueName}`);
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
 
     const discordButton = new ButtonBuilder()
       .setLabel('Vote for this mission')
