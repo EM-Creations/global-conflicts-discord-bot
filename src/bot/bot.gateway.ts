@@ -86,7 +86,7 @@ export class BotGateway {
         return;
       }
     }
-    if (interaction.channelId == process.env.DISCORD_BOT_CHANNEL) {
+    if (interaction.channelId == process.env.DISCORD_BOT_AAR_CHANNEL) {
       if (interaction.isButton() && interaction.customId) {
         const uniqueName = interaction.customId;
         const clicker = interaction.user;
