@@ -93,10 +93,9 @@ export class BotGateway {
 
 
         const missionFound = await this.db.collection('missions').findOne({
-          uniqueName: uniqueName,
-          authorID: clicker.id,
+          uniqueName: uniqueName
         })
-        if (missionFound) {
+        if (missionFound.authorID == clicker.id) {
           await interaction.reply({
             content: 'You can\'t rate your own mission. 🤓',
             ephemeral: true,
