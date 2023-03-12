@@ -149,7 +149,7 @@ export class BotGateway {
 
       }
       if (interaction.isAnySelectMenu()) {
-        interaction.deferUpdate();
+        await interaction.deferUpdate();
         const uniqueName = interaction.customId;
         const clicker = interaction.user;
 
