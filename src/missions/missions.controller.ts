@@ -177,7 +177,7 @@ export class MissionsController {
   async new_Hhistory(@Body() body): Promise<object> {
     const discordClient = this.discordProvider.getClient();
     const channel: TextChannel = discordClient.channels.cache.get(
-      process.env.DISCORD_BOT_CHANNEL,
+      process.env.DISCORD_BOT_AAR_CHANNEL,
     ) as TextChannel;
 
     const leadersDescriptionText = body.leaders
