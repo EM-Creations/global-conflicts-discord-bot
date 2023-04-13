@@ -113,7 +113,27 @@ export class MissionsController {
       process.env.DISCORD_BOT_MISSION_REVIEWER_CHANNEL,
     ) as TextChannel;
     await channel.send({
-      content: `<@&${process.env.DISCORD_MISSION_REVIEW_TEAM_ROLE_ID}>, a mission review has been requested.`,
+      content: `<@&${process.env.DISCORD_MISSION_REVIEW_TEAM_ROLE_ID}>, a mission audit has been requested.`,
+      embeds: [newMissionEmbed],
+    });
+    return;
+  }
+  @Post('/request_audit_cancel')
+  async requestAuditCancel(@Body() body): Promise<object> {
+    const newMissionEmbed = new EmbedBuilder()
+      .setColor('#ff2020')
+      .setTitle(body.name)
+      .setAuthor({ name: `Author: ${body.author}`, iconURL: body.displayAvatarURL })
+      .setDescription(`Version: ${body.version}.`)
+      .setTimestamp()
+      .setURL(`https://globalconflicts.net/missions/${body.uniqueName}`);
+
+    const discordClient = this.discordProvider.getClient();
+    const channel: TextChannel = discordClient.channels.cache.get(
+      process.env.DISCORD_BOT_MISSION_REVIEWER_CHANNEL,
+    ) as TextChannel;
+    await channel.send({
+      content: `A mission audit request has been canceled.`,
       embeds: [newMissionEmbed],
     });
     return;
