@@ -11,6 +11,9 @@ import Server from '../helpers/server';
 import Time from '../helpers/time';
 import Settings from '../polling/teamspeak/settings';
 import MayPostTeamspeakViewer from '../polling/teamspeak/teamspeak';
+import * as fs from 'fs';
+import * as chokidar from 'chokidar';
+import * as path from 'path';
 
 @Injectable()
 export class BotGateway {
@@ -26,9 +29,32 @@ export class BotGateway {
 
   @Once('ready')
   onReady(): void {
+    const discordProvider = this.discordProvider;
     this.logger.log(
       `Loggedd in as ${this.discordProvider.getClient().user.tag}!`,
     );
+
+
+    chokidar.watch('C:\\www\\media\\youtube_vids', {
+      awaitWriteFinish: {
+        stabilityThreshold: 5000,
+        pollInterval: 1000
+      },
+    })
+      .on('add', async function (_path) {
+        const discordClient = discordProvider.getClient();
+        const channel: TextChannel = discordClient.channels.cache.get(
+          process.env.ARMA_MEDIA_CHANNEL,
+        ) as TextChannel;
+
+        var file =
+          encodeURI(path.basename(_path));
+
+        await channel.send({
+          content: `Someone uploaded new footage the FTP!\nhttps://content.globalconflicts.net/youtube_vids/${file}
+        `,
+        });
+      })
 
     this.startPolling();
     this.loopPolling();
@@ -102,17 +128,13 @@ export class BotGateway {
           });
           return;
         }
-        if(!missionFound.history){
+        if (!missionFound.history) {
           await interaction.reply({
             content: 'You can\'t rate a mission that hasn\'t been played yet.',
             ephemeral: true,
           });
           return;
         }
-
-       
-
-
 
         const row = new ActionRowBuilder<StringSelectMenuBuilder>()
           .addComponents(
