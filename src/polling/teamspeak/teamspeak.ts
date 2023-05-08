@@ -11,7 +11,6 @@ const os = require('os');
 const fs = require('fs');
 
 export default async function MayPostTeamspeakViewer(discordClient) {
-  console.log('MayPostTeamspeakViewer');
   try {
     await new Pageres({ delay: 5, filename: 'screenshot' })
       .src(process.env.TS3_VIEWER_URL, ['500x50'])
