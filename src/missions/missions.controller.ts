@@ -248,7 +248,6 @@ export class MissionsController {
 
     });
     await channel.send({
-      content: "If you played this mission, consider rating it:\nRate the mission, not the leadership!\nRatings are visible only to the mission maker and Admins/GMs",
       components: [row]
     })
     return;
