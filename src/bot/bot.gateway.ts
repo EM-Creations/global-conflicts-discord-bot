@@ -36,6 +36,7 @@ export class BotGateway {
 
 
     chokidar.watch('C:\\www\\media\\youtube_vids', {
+      ignoreInitial:true,
       awaitWriteFinish: {
         stabilityThreshold: 5000,
         pollInterval: 1000
