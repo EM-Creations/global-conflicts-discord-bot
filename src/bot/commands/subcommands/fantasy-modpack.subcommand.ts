@@ -30,7 +30,7 @@ export class FantasyTestServerSubCommand {
         let child: ChildProcessWithoutNullStreams;
         if (action == "restart") {
             child = spawn('powershell.exe', [
-                `${process.env.FANTASY_TEST_SERVER_START_SCRIPT_PATH}/start.ps1`,
+                `${process.env.FANTASY_TEST_SERVER_START_SCRIPT_PATH}\\start.ps1`,
             ]);
             child.stdout.on('data', async function (data) {
                 try {
@@ -44,7 +44,7 @@ export class FantasyTestServerSubCommand {
             });
 
         } else {
-            child = spawn('powershell.exe', [`${process.env.FANTASY_TEST_SERVER_START_SCRIPT_PATH}/stop.ps1`,]);
+            child = spawn('powershell.exe', [`${process.env.FANTASY_TEST_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
             child.stdout.on('data', async function (data) {
                 try {
                     const text = '' + data;
