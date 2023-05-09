@@ -1,6 +1,4 @@
 
-
-
 import {
   Command,
   DiscordClientProvider,
@@ -19,8 +17,15 @@ import { CrossCommunityTestServerSubCommand } from '../subcommands/crosscommunit
 
 @Command({
   name: 'server',
-  description: "Stops a test server. Starts if it's offline.",
+  description: "Restarts a test server. Starts if it's offline.",
   include: [
+    UseGroup(
+      { name: 'restart', description: 'The server you want to interact with.' },
+      MainTestServerSubCommand,
+      WW2TestServerSubCommand,
+      FantasyTestServerSubCommand,
+      CrossCommunityTestServerSubCommand
+    ),
     UseGroup(
       { name: 'stop', description: 'The server you want to interact with.' },
       MainTestServerSubCommand,
@@ -31,7 +36,7 @@ import { CrossCommunityTestServerSubCommand } from '../subcommands/crosscommunit
   ]
 })
 
-export class StopTestServerCommand {
+export class TestServersCommands {
   constructor(private readonly discordProvider: DiscordClientProvider) { }
   @Handler()
   onPlayCommand(
