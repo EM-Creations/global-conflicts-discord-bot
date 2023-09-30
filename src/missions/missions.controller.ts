@@ -73,6 +73,7 @@ export class MissionsController {
       .setTitle(body.name)
       .setAuthor({ name: `Mission Author: ${missionAuthor.username}`, iconURL: body.displayAvatarURL })
       .addFields(
+        { name: 'Version:', value: body.version, inline: false },
         { name: 'Changelog:', value: body.changelog, inline: false },
         {
           name: 'Player Count:',
