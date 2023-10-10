@@ -65,7 +65,7 @@ export class MissionsController {
     const discordClient = this.discordProvider.getClient();
     let missionAuthor = await discordClient.users.fetch(body.missionAuthor);
 
-
+    const versionSrt = body.version.minor ? `Major: ${body.version.major} Minor: ${body.version.minor}`: `Major: ${body.version.major}`;
 
     const newMissionEmbed = new EmbedBuilder()
 
@@ -73,7 +73,7 @@ export class MissionsController {
       .setTitle(body.name)
       .setAuthor({ name: `Mission Author: ${missionAuthor.username}`, iconURL: body.displayAvatarURL })
       .addFields(
-        { name: 'Version:', value: body.version, inline: false },
+        { name: 'Version:', value: versionSrt, inline: false },
         { name: 'Changelog:', value: body.changelog, inline: false },
         {
           name: 'Player Count:',

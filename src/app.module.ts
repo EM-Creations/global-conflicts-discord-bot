@@ -38,7 +38,7 @@ import { GatewayIntentBits } from 'discord.js';
     BotModule,
     MongoModule.forRoot(process.env.MONGO_HOST, 'prod'),
   ],
-  controllers: [UsersController, MissionsController, AppController],
+  controllers: [UsersController, MissionsController, AppController, ServerController],
   providers: [AppService],
 })
 export class AppModule {}
