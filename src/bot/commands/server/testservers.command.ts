@@ -14,6 +14,7 @@ import { FantasyTestServerSubCommand } from '../subcommands/fantasy-modpack.subc
 import { MainTestServerSubCommand } from '../subcommands/main-modpack.subcommand';
 import { WW2TestServerSubCommand } from '../subcommands/ww2-modpack.subcomand';
 import { CrossCommunityTestServerSubCommand } from '../subcommands/crosscommunity-modpack.subcommand';
+import { ModRouletteTestServerSubCommand } from '../subcommands/mod-roulette-modpack.subcommand';
 
 @Command({
   name: 'server',
@@ -24,14 +25,20 @@ import { CrossCommunityTestServerSubCommand } from '../subcommands/crosscommunit
       MainTestServerSubCommand,
       WW2TestServerSubCommand,
       FantasyTestServerSubCommand,
-      CrossCommunityTestServerSubCommand
+      CrossCommunityTestServerSubCommand,
+      ModRouletteTestServerSubCommand
     ),
     UseGroup(
       { name: 'stop', description: 'The server you want to interact with.' },
       MainTestServerSubCommand,
       WW2TestServerSubCommand,
       FantasyTestServerSubCommand,
-      CrossCommunityTestServerSubCommand
+      CrossCommunityTestServerSubCommand,
+      ModRouletteTestServerSubCommand
+    ),
+    UseGroup(
+      { name: 'update_mods', description: 'Triggers Swifty update process. Can take a while.' },
+      ModRouletteTestServerSubCommand
     )
   ]
 })

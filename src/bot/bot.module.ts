@@ -7,10 +7,11 @@ import { FantasyTestServerSubCommand } from './commands/subcommands/fantasy-modp
 import { MainTestServerSubCommand } from './commands/subcommands/main-modpack.subcommand';
 import { WW2TestServerSubCommand } from './commands/subcommands/ww2-modpack.subcomand';
 import { CrossCommunityTestServerSubCommand } from './commands/subcommands/crosscommunity-modpack.subcommand';
+import { ModRouletteTestServerSubCommand } from './commands/subcommands/mod-roulette-modpack.subcommand';
 
 @Module({
   imports: [DiscordModule.forFeature()],
   exports: [DiscordModule],
-  providers: [BotGateway, TestServersCommands, FantasyTestServerSubCommand, MainTestServerSubCommand, WW2TestServerSubCommand, CrossCommunityTestServerSubCommand],
+  providers: [BotGateway, TestServersCommands, FantasyTestServerSubCommand, MainTestServerSubCommand, WW2TestServerSubCommand, CrossCommunityTestServerSubCommand, ModRouletteTestServerSubCommand],
 })
 export class BotModule { }
