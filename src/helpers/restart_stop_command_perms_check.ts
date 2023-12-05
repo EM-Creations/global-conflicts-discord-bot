@@ -2,7 +2,8 @@ import { GuildMemberRoleManager } from "discord.js";
 
 export default function permissionCheck(member) {
 
-    const dayOfWeek = new Date().getDay();
+    const date = new Date();
+    const dayOfWeek = date.getDay();
     const isWeekend = dayOfWeek === 6 || dayOfWeek === 0;
     const userRoleManager: GuildMemberRoleManager = member
         .roles as GuildMemberRoleManager;
@@ -23,7 +24,12 @@ export default function permissionCheck(member) {
     }
 
     if (isWeekend) {
-        return 'This command only works on weekdays.';
+        const dayHour = date.getHours();
+        if (dayHour <= 10) {
+            return true
+        } else {
+            return 'This command cannot be ran while a main session is running/getting started';
+        }
     }
     return true;
 }
