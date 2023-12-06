@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { DiscordClientProvider, On, Once } from '@discord-nestjs/core';
 import { Injectable, Logger } from '@nestjs/common';
 
@@ -11,7 +12,6 @@ import Server from '../helpers/server';
 import Time from '../helpers/time';
 import Settings from '../polling/teamspeak/settings';
 import MayPostTeamspeakViewer from '../polling/teamspeak/teamspeak';
-import * as fs from 'fs';
 import * as chokidar from 'chokidar';
 import * as path from 'path';
 
@@ -48,7 +48,7 @@ export class BotGateway {
           process.env.ARMA_MEDIA_CHANNEL,
         ) as TextChannel;
 
-        var file =
+        const file =
           encodeURI(path.basename(_path));
 
         await channel.send({
