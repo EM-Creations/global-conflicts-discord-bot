@@ -14,14 +14,14 @@ export class ModRouletteTestServerSubCommand {
         const channel = args[0].channel as TextChannel;
 
         const userRoleManager: GuildMemberRoleManager = member
-        .roles as GuildMemberRoleManager;
+            .roles as GuildMemberRoleManager;
 
         const permCheck = userRoleManager.cache.some(
             (role) => role.id === process.env.DISCORD_ADMIN_ROLE_ID ||
-            role.id === process.env.DISCORD_MOD_ROULETTE_OPERATOR_ROLE_ID || 
-            role.id === process.env.DISCORD_MISSION_REVIEW_TEAM_ROLE_ID
+                role.id === process.env.DISCORD_MOD_ROULETTE_OPERATOR_ROLE_ID ||
+                role.id === process.env.DISCORD_MISSION_REVIEW_TEAM_ROLE_ID
         );
-        
+
 
         if (permCheck != true) {
             return "You don't have permission to use this command."
@@ -51,7 +51,7 @@ export class ModRouletteTestServerSubCommand {
                 }
             });
 
-        } else if(action == "stop") {
+        } else if (action == "stop") {
             child = spawn('powershell.exe', [`${process.env.MAIN_TEST_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
             child.stdout.on('data', async function (data) {
                 try {
@@ -64,34 +64,22 @@ export class ModRouletteTestServerSubCommand {
                 }
             });
         }
-        else if(action == "update_mods"){
-            child = spawn('powershell.exe', [`${process.env.MAIN_TEST_SERVER_START_SCRIPT_PATH}\\update_swifty.ps1`,]);
-            child.stdout.on('data', async function (data) {
-                try {
-                    const text = '' + data;
-                    if (text.includes('->')) {
-                        await channel.send(text.replace('->', ''));
+        else if (action == "update_mods") {
+            var exec = require('child_process').exec;
+            child = exec("C:\\s\\swifty-cli.exe create D:\\ArmAServers\\modrouletteOperator\\repo.json D:\\ArmAServers\\mod-roulette-mods",
+                async function (error, stdout, stderr) {
+                    console.log('stdout: ' + stdout);
+                    console.log('stderr: ' + stderr);
+                    //   await channel.send(text.replace('->', ''))
+                    if (stderr || stdout) {
+                        await channel.send(stderr || stdout);
                     }
-                } catch (e) {
-                    console.log(e);
-                }
-            });
+
+                });
 
         }
 
-
-        child.stderr.on('data', async function (data) {
-            try {
-                const text = '' + data;
-                if (text.includes('->')) {
-                    await channel.send(text.replace('->', ''));
-                }
-                await channel.send('An error happened!');
-                await adminChannel.send('' + data);
-            } catch (e) {
-                console.log(e);
-            }
-        });
+ 
 
         child.stdin.end();
     }
