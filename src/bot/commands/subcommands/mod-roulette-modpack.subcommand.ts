@@ -1,7 +1,7 @@
 import { SlashCommandPipe } from "@discord-nestjs/common";
 import { DiscordClientProvider, EventParams, Handler, IA, SubCommand } from "@discord-nestjs/core";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
-import { ChatInputCommandInteraction, ClientEvents, GuildMemberRoleManager, TextChannel } from "discord.js";
+import { ChatInputCommandInteraction, ClientEvents, GuildMemberRoleManager, TextChannel, AttachmentBuilder } from "discord.js";
 import permissionCheck from "src/helpers/restart_stop_command_perms_check";
 @SubCommand({ name: 'mod_roulette_test', description: 'Starts/Restarts the mod roulette test server.', })
 export class ModRouletteTestServerSubCommand {
@@ -50,6 +50,8 @@ export class ModRouletteTestServerSubCommand {
                     console.log(e);
                 }
             });
+            child.stdin.end();
+            return "Restarting server...";
 
         } else if (action == "stop") {
             child = spawn('powershell.exe', [`${process.env.MAIN_TEST_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
@@ -58,30 +60,38 @@ export class ModRouletteTestServerSubCommand {
                     const text = '' + data;
                     if (text.includes('->')) {
                         await channel.send(text.replace('->', ''));
+
                     }
                 } catch (e) {
                     console.log(e);
                 }
             });
+            child.stdin.end();
+            return "Stopping server...";
         }
         else if (action == "update_mods") {
+            let fullLog = ""
             var exec = require('child_process').exec;
-            child = exec("D:\\ArmAServers\\scripts\\mod_roulette\\swifty-cli.exe create D:\\ArmAServers\\modrouletteOperator\\repo.json D:\\ArmAServers\\mod-roulette-mods",
-                async function (error, stdout, stderr) {
-                    console.log('stdout: ' + stdout);
-                    console.log('stderr: ' + stderr);
-                    const text = stderr || stdout;
-                    //   await channel.send(text.replace('->', ''))
-                    if (text) {
-                        await channel.send(stderr || stdout);
-                    }
 
+            child = exec(process.env.MOD_ROULETTE_SWIFTY_COMMAND,
+                function (error, stdout, stderr) {
+                    const text = stderr || stdout;
+                    if (text) {
+                        fullLog = fullLog + text
+                    }
                 });
+            child.on('close', (code) => {
+                let buffer = Buffer.from(fullLog);
+                const attachment = new AttachmentBuilder(buffer, { name: 'swifty-log.txt' })
+                channel.send({ content: "Swifty update finished", files: [attachment] });
+                child.stdin.end();
+            });
+            return "Swifty update started, please wait.";
 
         }
 
- 
 
-        child.stdin.end();
+
+
     }
 }

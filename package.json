@@ -30,7 +30,7 @@
     "@nestjs/platform-express": "9.3.3",
     "@nestjs/platform-fastify": "9.3.3",
     "chokidar": "^3.5.3",
-    "discord.js": "^14.11.0",
+    "discord.js": "14.11.0",
     "gamedig": "^3.0.8",
     "moment": "^2.29.1",
     "mongodb": "^4.2.2",
