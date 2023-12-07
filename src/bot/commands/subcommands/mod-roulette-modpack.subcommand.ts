@@ -66,12 +66,13 @@ export class ModRouletteTestServerSubCommand {
         }
         else if (action == "update_mods") {
             var exec = require('child_process').exec;
-            child = exec("C:\\s\\swifty-cli.exe create D:\\ArmAServers\\modrouletteOperator\\repo.json D:\\ArmAServers\\mod-roulette-mods",
+            child = exec("D:\\ArmAServers\\scripts\\mod_roulette\\swifty-cli.exe create D:\\ArmAServers\\modrouletteOperator\\repo.json D:\\ArmAServers\\mod-roulette-mods",
                 async function (error, stdout, stderr) {
                     console.log('stdout: ' + stdout);
                     console.log('stderr: ' + stderr);
+                    const text = stderr || stdout;
                     //   await channel.send(text.replace('->', ''))
-                    if (stderr || stdout) {
+                    if (text) {
                         await channel.send(stderr || stdout);
                     }
 
