@@ -38,7 +38,7 @@ export class ModRouletteTestServerSubCommand {
         let child: ChildProcessWithoutNullStreams;
         if (action == "restart") {
             child = spawn('powershell.exe', [
-                `${process.env.MAIN_TEST_SERVER_START_SCRIPT_PATH}\\start.ps1`,
+                `${process.env.MOD_ROULETTE_sERVER_SERVER_START_SCRIPT_PATH}\\start.ps1`,
             ]);
             child.stdout.on('data', async function (data) {
                 try {
@@ -54,7 +54,7 @@ export class ModRouletteTestServerSubCommand {
             return "Restarting server...";
 
         } else if (action == "stop") {
-            child = spawn('powershell.exe', [`${process.env.MAIN_TEST_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
+            child = spawn('powershell.exe', [`${process.env.MOD_ROULETTE_sERVER_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
             child.stdout.on('data', async function (data) {
                 try {
                     const text = '' + data;
