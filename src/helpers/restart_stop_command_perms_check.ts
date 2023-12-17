@@ -25,7 +25,7 @@ export default function permissionCheck(member) {
 
     if (isWeekend) {
         const dayHour = date.getHours();
-        if (dayHour <= 10) {
+        if (dayHour <= 10 || dayHour >= 17) {
             return true
         } else {
             return 'This command cannot be ran while a main session is running/getting started';
