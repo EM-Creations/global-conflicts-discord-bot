@@ -8,10 +8,20 @@ import { MainTestServerSubCommand } from './commands/subcommands/main-modpack.su
 import { WW2TestServerSubCommand } from './commands/subcommands/ww2-modpack.subcomand';
 import { CrossCommunityTestServerSubCommand } from './commands/subcommands/crosscommunity-modpack.subcommand';
 import { ModRouletteTestServerSubCommand } from './commands/subcommands/mod-roulette-modpack.subcommand';
+import { ReforgerServerSubCommand } from './commands/subcommands/reforger.subcommand';
 
 @Module({
   imports: [DiscordModule.forFeature()],
   exports: [DiscordModule],
-  providers: [BotGateway, TestServersCommands, FantasyTestServerSubCommand, MainTestServerSubCommand, WW2TestServerSubCommand, CrossCommunityTestServerSubCommand, ModRouletteTestServerSubCommand],
+  providers: [
+    BotGateway, 
+    TestServersCommands, 
+    FantasyTestServerSubCommand, 
+    MainTestServerSubCommand, 
+    WW2TestServerSubCommand, 
+    CrossCommunityTestServerSubCommand, 
+    ModRouletteTestServerSubCommand,
+    ReforgerServerSubCommand
+],
 })
 export class BotModule { }
