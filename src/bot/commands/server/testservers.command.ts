@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 
 import { FantasyTestServerSubCommand } from '../subcommands/fantasy-modpack.subcommand';
-import { MainTestServerSubCommand } from '../subcommands/main-modpack.subcommand';
+import { MainServerSubCommand, MainTestServerSubCommand } from '../subcommands/main-modpack.subcommand';
 import { WW2TestServerSubCommand } from '../subcommands/ww2-modpack.subcomand';
 import { CrossCommunityTestServerSubCommand } from '../subcommands/crosscommunity-modpack.subcommand';
 import { ModRouletteTestServerSubCommand } from '../subcommands/mod-roulette-modpack.subcommand';
@@ -22,6 +22,7 @@ import { ModRouletteTestServerSubCommand } from '../subcommands/mod-roulette-mod
   include: [
     UseGroup(
       { name: 'restart', description: 'The server you want to interact with.' },
+      MainServerSubCommand,
       MainTestServerSubCommand,
       WW2TestServerSubCommand,
       FantasyTestServerSubCommand,
