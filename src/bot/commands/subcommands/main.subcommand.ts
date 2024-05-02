@@ -2,10 +2,10 @@ import { SlashCommandPipe } from "@discord-nestjs/common";
 import { DiscordClientProvider, EventParams, Handler, IA, SubCommand } from "@discord-nestjs/core";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { ChatInputCommandInteraction, ClientEvents, GuildMemberRoleManager, TextChannel } from "discord.js";
-import permissionCheck from "src/helpers/restart_stop_command_perms_check";
+import { permissionCheckMain } from "src/helpers/restart_stop_command_perms_check";
 
-@SubCommand({ name: 'main_test', description: 'Starts/Restarts the test server. This is the test regular server for regular missions.', })
-export class MainTestServerSubCommand {
+@SubCommand({ name: 'main', description: 'Starts/Restarts the main server. This is the regular server for sessions.', })
+export class MainServerSubCommand {
     constructor(private readonly discordProvider: DiscordClientProvider) { }
 
     @Handler()
@@ -18,7 +18,7 @@ export class MainTestServerSubCommand {
         if (args[0] instanceof ChatInputCommandInteraction) {
             action = args[0].options["_group"];
         }
-        const permCheck = permissionCheck(member, action)
+        const permCheck = permissionCheckMain(member)
 
         if (permCheck != true) {
             return permCheck
@@ -31,7 +31,7 @@ export class MainTestServerSubCommand {
         let child: ChildProcessWithoutNullStreams;
         if (action == "restart") {
             child = spawn('powershell.exe', [
-                `${process.env.MAIN_TEST_SERVER_START_SCRIPT_PATH}\\start.ps1`,
+                `${process.env.MAIN_SERVER_START_SCRIPT_PATH}\\start.ps1`,
             ]);
             child.stdout.on('data', async function (data) {
                 try {
@@ -45,7 +45,7 @@ export class MainTestServerSubCommand {
             });
 
         } else {
-            child = spawn('powershell.exe', [`${process.env.MAIN_TEST_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
+            child = spawn('powershell.exe', [`${process.env.MAIN_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
             child.stdout.on('data', async function (data) {
                 try {
                     const text = '' + data;
