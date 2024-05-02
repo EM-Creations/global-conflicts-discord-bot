@@ -4,7 +4,7 @@ import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { ChatInputCommandInteraction, ClientEvents, GuildMemberRoleManager, TextChannel } from "discord.js";
 import permissionCheck from "src/helpers/restart_stop_command_perms_check";
 
-@SubCommand({ name: 'main_test', description: 'Starts/Restarts the test server. This is the test regular server for regular missions.', })
+@SubCommand({ name: 'test', description: 'Starts/Restarts the test server. This is the test regular server for regular missions.', })
 export class MainTestServerSubCommand {
     constructor(private readonly discordProvider: DiscordClientProvider) { }
 
