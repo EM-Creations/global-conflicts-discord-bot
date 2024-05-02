@@ -19,7 +19,7 @@ import { ModRouletteTestServerSubCommand } from '../subcommands/mod-roulette-mod
 
 @Command({
   name: 'server',
-  description: "Restarts a test server. Starts if it's offline.",
+  description: "Restarts a server. Starts if it's offline.",
   include: [
     UseGroup(
       { name: 'restart', description: 'The server you want to interact with.' },
