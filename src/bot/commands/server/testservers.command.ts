@@ -16,6 +16,7 @@ import { MainServerSubCommand } from '../subcommands/main.subcommand';
 import { WW2TestServerSubCommand } from '../subcommands/ww2-modpack.subcomand';
 import { CrossCommunityTestServerSubCommand } from '../subcommands/crosscommunity-modpack.subcommand';
 import { ModRouletteTestServerSubCommand } from '../subcommands/mod-roulette-modpack.subcommand';
+import { ReforgerServerSubCommand } from '../subcommands/reforger.subcommand';
 
 @Command({
   name: 'server',
@@ -28,7 +29,8 @@ import { ModRouletteTestServerSubCommand } from '../subcommands/mod-roulette-mod
       WW2TestServerSubCommand,
       FantasyTestServerSubCommand,
       CrossCommunityTestServerSubCommand,
-      ModRouletteTestServerSubCommand
+      ModRouletteTestServerSubCommand,
+      ReforgerServerSubCommand
     ),
     UseGroup(
       { name: 'stop', description: 'The server you want to interact with.' },
@@ -37,7 +39,8 @@ import { ModRouletteTestServerSubCommand } from '../subcommands/mod-roulette-mod
       WW2TestServerSubCommand,
       FantasyTestServerSubCommand,
       CrossCommunityTestServerSubCommand,
-      ModRouletteTestServerSubCommand
+      ModRouletteTestServerSubCommand,
+      ReforgerServerSubCommand
     ),
     UseGroup(
       { name: 'update_mods', description: 'Triggers Swifty update process. Can take a while.' },
