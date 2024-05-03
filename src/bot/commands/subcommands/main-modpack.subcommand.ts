@@ -30,6 +30,7 @@ export class MainTestServerSubCommand {
         ) as TextChannel;
         let child: ChildProcessWithoutNullStreams;
         if (action == "restart") {
+            channel.send(member?.user?.username + ' restarted test server');
             child = spawn('powershell.exe', [
                 `${process.env.MAIN_TEST_SERVER_START_SCRIPT_PATH}\\start.ps1`,
             ]);
@@ -45,6 +46,7 @@ export class MainTestServerSubCommand {
             });
 
         } else {
+            channel.send(member?.user?.username + ' stopped test server');
             child = spawn('powershell.exe', [`${process.env.MAIN_TEST_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
             child.stdout.on('data', async function (data) {
                 try {

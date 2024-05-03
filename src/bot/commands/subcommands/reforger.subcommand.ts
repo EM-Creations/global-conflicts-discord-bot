@@ -32,6 +32,7 @@ export class ReforgerServerSubCommand {
         }
         let child: ChildProcessWithoutNullStreams;
         if (action == "restart") {
+            channel.send(member?.user?.username + ' restarted reforger server');
             child = spawn('powershell.exe', [
                 `${process.env.MAIN_REFORGER_SERVER_START_SCRIPT_PATH}\\start.ps1`,
             ]);
@@ -69,6 +70,7 @@ export class ReforgerServerSubCommand {
             });
 
         } else {
+            channel.send(member?.user?.username + ' stopped reforger server');
             child = spawn('powershell.exe', [`${process.env.MAIN_REFORGER_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
             child.stdout.on('data', async function (data) {
                 try {

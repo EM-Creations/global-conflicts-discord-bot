@@ -46,8 +46,6 @@ export class MainServerSubCommand {
             });
 
         } else {
-            console.log(member.user.username);
-            
             channel.send(member?.user?.username + ' stopped main server');
             child = spawn('powershell.exe', [`${process.env.MAIN_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
             child.stdout.on('data', async function (data) {
