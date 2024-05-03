@@ -12,6 +12,7 @@ import {
 
 import { FantasyTestServerSubCommand } from '../subcommands/fantasy-modpack.subcommand';
 import { MainTestServerSubCommand } from '../subcommands/main-modpack.subcommand';
+import { MainServerSubCommand } from '../subcommands/main.subcommand';
 import { WW2TestServerSubCommand } from '../subcommands/ww2-modpack.subcomand';
 import { CrossCommunityTestServerSubCommand } from '../subcommands/crosscommunity-modpack.subcommand';
 import { ModRouletteTestServerSubCommand } from '../subcommands/mod-roulette-modpack.subcommand';
@@ -19,10 +20,11 @@ import { ReforgerServerSubCommand } from '../subcommands/reforger.subcommand';
 
 @Command({
   name: 'server',
-  description: "Restarts a test server. Starts if it's offline.",
+  description: "Restarts a server. Starts if it's offline.",
   include: [
     UseGroup(
       { name: 'restart', description: 'The server you want to interact with.' },
+      MainServerSubCommand,
       MainTestServerSubCommand,
       WW2TestServerSubCommand,
       FantasyTestServerSubCommand,
@@ -33,6 +35,7 @@ import { ReforgerServerSubCommand } from '../subcommands/reforger.subcommand';
     UseGroup(
       { name: 'stop', description: 'The server you want to interact with.' },
       MainTestServerSubCommand,
+      MainServerSubCommand,
       WW2TestServerSubCommand,
       FantasyTestServerSubCommand,
       CrossCommunityTestServerSubCommand,
