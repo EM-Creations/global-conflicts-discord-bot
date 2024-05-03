@@ -2,6 +2,8 @@ import { SlashCommandPipe } from "@discord-nestjs/common";
 import { DiscordClientProvider, EventParams, Handler, IA, SubCommand } from "@discord-nestjs/core";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { ChatInputCommandInteraction, ClientEvents, GuildMemberRoleManager, TextChannel } from "discord.js";
+import { isEmpty } from "rxjs";
+import { BotGateway } from "src/bot/bot.gateway";
 import permissionCheckReforger from "src/helpers/reforger_command_perms_check";
 
 @SubCommand({ name: 'reforger', description: 'Starts/Restarts the reforger server.', })
@@ -35,9 +37,31 @@ export class ReforgerServerSubCommand {
             ]);
             child.stdout.on('data', async function (data) {
                 try {
-                    const text = '' + data;
-                    if (text.includes('->')) {
-                        await channel.send(text.replace('->', ''));
+                    if (data) {
+                        let text = '' + data;
+                        if (text.length > 0 && (
+                            text.includes('->') ||
+                            text.includes('(E)') ||
+                            text.includes('(W)')
+                        )) {
+                            await channel.send({content: text})
+                        }
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            });
+            child.stderr.on('data', async function (data) {
+                try {
+                    if (data) {
+                        let text = '' + data;
+                        if (text.length > 0 && (
+                            text.includes('->') ||
+                            text.includes('(E)') ||
+                            text.includes('(W)')
+                        )) {
+                            await channel.send({content: text})
+                        }
                     }
                 } catch (e) {
                     console.log(e);
@@ -48,28 +72,37 @@ export class ReforgerServerSubCommand {
             child = spawn('powershell.exe', [`${process.env.MAIN_REFORGER_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
             child.stdout.on('data', async function (data) {
                 try {
-                    const text = '' + data;
-                    if (text.includes('->')) {
-                        await channel.send(text.replace('->', ''));
+                    if (data) {
+                        let text = '' + data;
+                        if (text.length > 0 && (
+                            text.includes('->') ||
+                            text.includes('(E)') ||
+                            text.includes('(W)')
+                        )) {
+                            await channel.send({content: text})
+                        }
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            });
+            child.stderr.on('data', async function (data) {
+                try {
+                    if (data) {
+                        let text = '' + data;
+                        if (text.length > 0 && (
+                            text.includes('->') ||
+                            text.includes('(E)') ||
+                            text.includes('(W)')
+                        )) {
+                            await channel.send({content: text})
+                        }
                     }
                 } catch (e) {
                     console.log(e);
                 }
             });
         }
-        child.stderr.on('data', async function (data) {
-            try {
-                const text = '' + data;
-                if (text.includes('->')) {
-                    await channel.send(text.replace('->', ''));
-                }
-                await channel.send('An error happened!');
-                await adminChannel.send('' + data);
-            } catch (e) {
-                console.log(e);
-            }
-        });
-
         child.stdin.end();
     }
 }
