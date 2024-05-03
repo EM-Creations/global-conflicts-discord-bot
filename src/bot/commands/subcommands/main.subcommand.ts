@@ -30,7 +30,7 @@ export class MainServerSubCommand {
         ) as TextChannel;
         let child: ChildProcessWithoutNullStreams;
         if (action == "restart") {
-            channel.send(member + 'restarted main server');
+            channel.send(member.name + 'restarted main server');
             child = spawn('powershell.exe', [
                 `${process.env.MAIN_SERVER_START_SCRIPT_PATH}\\start.ps1`,
             ]);
@@ -46,7 +46,7 @@ export class MainServerSubCommand {
             });
 
         } else {
-            channel.send(member + 'stopped main server');
+            channel.send(member.name + 'stopped main server');
             child = spawn('powershell.exe', [`${process.env.MAIN_SERVER_START_SCRIPT_PATH}\\stop.ps1`,]);
             child.stdout.on('data', async function (data) {
                 try {
