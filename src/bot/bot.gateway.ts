@@ -35,27 +35,27 @@ export class BotGateway {
     );
 
 
-    chokidar.watch('C:\\www\\media\\youtube_vids', {
-      ignoreInitial:true,
-      awaitWriteFinish: {
-        stabilityThreshold: 5000,
-        pollInterval: 1000
-      },
-    })
-      .on('add', async function (_path) {
-        const discordClient = discordProvider.getClient();
-        const channel: TextChannel = discordClient.channels.cache.get(
-          process.env.ARMA_MEDIA_CHANNEL,
-        ) as TextChannel;
+    // chokidar.watch('C:\\www\\media\\youtube_vids', {
+    //   ignoreInitial:true,
+    //   awaitWriteFinish: {
+    //     stabilityThreshold: 5000,
+    //     pollInterval: 1000
+    //   },
+    // })
+    //   .on('add', async function (_path) {
+    //     const discordClient = discordProvider.getClient();
+    //     const channel: TextChannel = discordClient.channels.cache.get(
+    //       process.env.ARMA_MEDIA_CHANNEL,
+    //     ) as TextChannel;
 
-        const file =
-          encodeURI(path.basename(_path));
+    //     const file =
+    //       encodeURI(path.basename(_path));
 
-        await channel.send({
-          content: `Someone uploaded new footage the FTP!\nhttps://content.globalconflicts.net/youtube_vids/${file}
-        `,
-        });
-      })
+    //     await channel.send({
+    //       content: `Someone uploaded new footage the FTP!\nhttps://content.globalconflicts.net/youtube_vids/${file}
+    //     `,
+    //     });
+    //   })
 
     this.startPolling();
     this.loopPolling();
