@@ -41,9 +41,9 @@ export class ReforgerServerSubCommand {
                     if (data) {
                         let text = '' + data;
                         if (text.length > 0 && (
-                            text.includes('->') ||
-                            text.includes('(E)') ||
-                            text.includes('(W)')
+                            text.includes('->') //||
+                            //text.includes('(E)') ||
+                            //text.includes('(W)')
                         )) {
                             await channel.send({content: text})
                         }
@@ -57,9 +57,9 @@ export class ReforgerServerSubCommand {
                     if (data) {
                         let text = '' + data;
                         if (text.length > 0 && (
-                            text.includes('->') ||
-                            text.includes('(E)') ||
-                            text.includes('(W)')
+                            text.includes('->') //||
+                            //text.includes('(E)') ||
+                            //text.includes('(W)')
                         )) {
                             await channel.send({content: text})
                         }
@@ -77,9 +77,9 @@ export class ReforgerServerSubCommand {
                     if (data) {
                         let text = '' + data;
                         if (text.length > 0 && (
-                            text.includes('->') ||
-                            text.includes('(E)') ||
-                            text.includes('(W)')
+                            text.includes('->') //||
+                            //text.includes('(E)') ||
+                            //text.includes('(W)')
                         )) {
                             await channel.send({content: text})
                         }
@@ -93,9 +93,9 @@ export class ReforgerServerSubCommand {
                     if (data) {
                         let text = '' + data;
                         if (text.length > 0 && (
-                            text.includes('->') ||
-                            text.includes('(E)') ||
-                            text.includes('(W)')
+                            text.includes('->') //||
+                            //text.includes('(E)') ||
+                            //text.includes('(W)')
                         )) {
                             await channel.send({content: text})
                         }

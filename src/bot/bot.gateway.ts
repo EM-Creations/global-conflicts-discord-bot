@@ -31,7 +31,7 @@ export class BotGateway {
   onReady(): void {
     const discordProvider = this.discordProvider;
     this.logger.log(
-      `Loggedd in as ${this.discordProvider.getClient().user.tag}!`,
+      `Logged in as ${this.discordProvider.getClient().user.tag}!`,
     );
 
 
@@ -235,13 +235,17 @@ export class BotGateway {
       process.env.ARMA_PINGS_CHANNEL_ID,
     ) as TextChannel;
 
+    await MayPostTeamspeakViewer(discordClient);
+
     if (this.maintenanceMode) {
       console.log('maintenanceMode');
-      await MayPostTeamspeakViewer(discordClient);
       return;
     }
 
     const messageId = Settings.get().messageId;
+    //Find reforger server
+    const queryReforger = await this.queryReforger;
+
     const query = await this.query;
 
     if (messageId && !forceNewMessage) {
@@ -348,7 +352,6 @@ export class BotGateway {
           }
         }
       }
-      await MayPostTeamspeakViewer(discordClient);
     }
   }
 
