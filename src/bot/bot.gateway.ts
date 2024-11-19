@@ -244,7 +244,7 @@ export class BotGateway {
 
     const messageId = Settings.get().messageId;
     //Find reforger server
-    const queryReforger = await this.queryReforger;
+    //const queryReforger = await this.queryReforger;
 
     const query = await this.query;
 
