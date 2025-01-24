@@ -1,8 +1,6 @@
 /// <reference types="node" />
 
 declare module 'gamedig' {
-  export type Type = 'arma3';
-
   export interface Player {
     name: string;
     raw: PlayerRaw;
@@ -14,7 +12,7 @@ declare module 'gamedig' {
   }
 
   export interface QueryOptions {
-    type: Type;
+    type: string;
     host: string;
     port?: number;
     notes?: object;

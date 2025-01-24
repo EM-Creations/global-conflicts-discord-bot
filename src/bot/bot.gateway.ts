@@ -9,19 +9,15 @@ import { InjectDb } from 'nest-mongodb';
 import { COLOR_ERROR, COLOR_MAINTENANCE, COLOR_OK } from '../helpers/colors';
 import locale from '../helpers/en';
 import Server from '../helpers/server';
-import Time from '../helpers/time';
 import Settings from '../polling/teamspeak/settings';
 import MayPostTeamspeakViewer from '../polling/teamspeak/teamspeak';
-import * as chokidar from 'chokidar';
-import * as path from 'path';
 
 @Injectable()
 export class BotGateway {
   private readonly logger = new Logger(BotGateway.name);
   private maintenanceMode: boolean;
-  private server = new Server(process.env.IP, parseInt(process.env.PORT));
-  private refreshFails = 0;
-  private maxRefreshFails = parseInt(process.env.MAXIMUM_REFRESH_FAILURES);
+  private a3Server = new Server(process.env.IP, parseInt(process.env.A3PORT), 'arma3');
+  private reforgerServer = new Server(process.env.IP, parseInt(process.env.REFORGERPORT), 'armareforger')
   constructor(
     private readonly discordProvider: DiscordClientProvider,
     @InjectDb() private readonly db: mongo.Db,
@@ -29,34 +25,9 @@ export class BotGateway {
 
   @Once('ready')
   onReady(): void {
-    const discordProvider = this.discordProvider;
     this.logger.log(
       `Logged in as ${this.discordProvider.getClient().user.tag}!`,
     );
-
-
-    // chokidar.watch('C:\\www\\media\\youtube_vids', {
-    //   ignoreInitial:true,
-    //   awaitWriteFinish: {
-    //     stabilityThreshold: 5000,
-    //     pollInterval: 1000
-    //   },
-    // })
-    //   .on('add', async function (_path) {
-    //     const discordClient = discordProvider.getClient();
-    //     const channel: TextChannel = discordClient.channels.cache.get(
-    //       process.env.ARMA_MEDIA_CHANNEL,
-    //     ) as TextChannel;
-
-    //     const file =
-    //       encodeURI(path.basename(_path));
-
-    //     await channel.send({
-    //       content: `Someone uploaded new footage the FTP!\nhttps://content.globalconflicts.net/youtube_vids/${file}
-    //     `,
-    //     });
-    //   })
-
     this.startPolling();
     this.loopPolling();
     console.info('Bot is running');
@@ -231,8 +202,8 @@ export class BotGateway {
   async startPolling(forceNewMessage = false) {
     const discordClient = this.discordProvider.getClient();
 
-    const armaPingChannel: TextChannel = discordClient.channels.cache.get(
-      process.env.ARMA_PINGS_CHANNEL_ID,
+    const serverViewerChannel: TextChannel = discordClient.channels.cache.get(
+      process.env.SERVER_VIEWER_CHANNEL_ID,
     ) as TextChannel;
 
     await MayPostTeamspeakViewer(discordClient);
@@ -242,16 +213,16 @@ export class BotGateway {
       return;
     }
 
-    const messageId = Settings.get().messageId;
-    //Find reforger server
-    //const queryReforger = await this.queryReforger;
+    const a3MessageId = Settings.get().a3MessageId;
+    const reforgerMessageId = Settings.get().reforgerMessageId
 
     const query = await this.query;
+    const queryReforger = await this.queryReforger;
 
-    if (messageId && !forceNewMessage) {
-      console.log(`old server status message id found ${messageId}`);
+    if (a3MessageId && !forceNewMessage) {
+      console.log(`old server status message id found ${a3MessageId}`);
       try {
-        const oldMessage = await armaPingChannel.messages.fetch(messageId);
+        const oldMessage = await serverViewerChannel.messages.fetch(a3MessageId);
         const embed = await this.createRichEmbed(query);
 
         const editing = oldMessage.edit({ embeds: [embed] });
@@ -262,7 +233,7 @@ export class BotGateway {
           })
           .catch((error) => {
             this.setActivity('botError');
-            console.error(`Failed to edit current message, id: ${messageId}.`);
+            console.error(`Failed to edit current message, id: ${a3MessageId}.`);
             console.error(error);
           });
       } catch (error) {
@@ -270,18 +241,18 @@ export class BotGateway {
         console.error(error);
       }
     } else {
-      if (forceNewMessage && messageId) {
+      if (forceNewMessage && a3MessageId) {
         console.log(`Deleting old server status message`);
-        const message = await armaPingChannel.messages.fetch(messageId);
+        const message = await serverViewerChannel.messages.fetch(a3MessageId);
         await message.delete();
       }
 
       console.log(`Posting new server status message`);
       const embed = await this.createRichEmbed(query);
-      armaPingChannel
+      serverViewerChannel
         .send({ embeds: [embed] })
         .then((newMessage) => {
-          Settings.set('messageId', newMessage.id);
+          Settings.set('a3MessageId', newMessage.id);
           this.setActivity(query ? 'ok' : 'serverError', query);
         })
         .catch((error) => {
@@ -290,78 +261,44 @@ export class BotGateway {
           console.error(error);
         });
     }
-    const errorMessageId = Settings.get().errorMessageId;
-    if (!query) {
-      if (!errorMessageId) {
-        console.log(`An arma server error occured, pinging admins`);
-        const ping = this.generatePing(process.env.DISCORD_ADMIN_ROLE_ID);
-        const content = `${ping}${locale.serverDownMessages.pingMessage}`;
 
-        armaPingChannel.send(content).then((newMessage) => {
-          Settings.set('errorMessageId', newMessage.id);
-        });
+    if (reforgerMessageId && !forceNewMessage) {
+      console.log(`old server status message id found ${reforgerMessageId}`);
+      try {
+        const oldMessage = await serverViewerChannel.messages.fetch(reforgerMessageId);
+        const embed = await this.createRichEmbed(queryReforger);
+
+        const editing = oldMessage.edit({ embeds: [embed] });
+        editing
+          .then(() => {
+            console.log(`server status message edited`);
+          })
+          .catch((error) => {
+            console.error(`Failed to edit current message, id: ${reforgerMessageId}.`);
+            console.error(error);
+          });
+      } catch (error) {
+        console.log(`Error trying to get old server status message `);
+        console.error(error);
       }
     } else {
-      console.log(`Server back online, removing ping message`);
-      this.removeErrorMessage(armaPingChannel);
-    }
-    // Post role ping message if threshold reached
-    if (query) {
-      console.log(`Server online`);
-      const minPlayers = parseInt(process.env.MINIMUM_PLAYER_COUNT_FOR_PING);
-
-      if (query.players.length >= minPlayers) {
-        // Don't duplicate the message
-        console.log(`Pinging players`);
-        if (!Settings.get().pingMessageId) {
-          armaPingChannel
-            .send(
-              this.generatePing(process.env.ARMA_PINGS_ROLE_ID) +
-              ` ${minPlayers} ${locale.pingMessage}`,
-            )
-            .then((newMessage) => {
-              Settings.set('pingMessageId', newMessage.id);
-              Settings.set('lastPingMessageTime', new Date().toISOString());
-            })
-            .catch((error) => {
-              this.setActivity('botError');
-              console.error('Failed to create a new message.');
-              console.error(error);
-            });
-        }
-      } else {
-        console.log(
-          `Player count lowered bellow ${minPlayers}, removing ping message`,
-        );
-        const settings = Settings.get();
-        if (settings.pingMessageId && settings.lastPingMessageTime) {
-          if (
-            Time.getDiffMinutes(
-              new Date(),
-              new Date(settings.lastPingMessageTime),
-            ) >= parseInt(process.env.TIMEOUT_BETWEEN_PLAYER_PINGS_IN_MINUTES)
-          ) {
-            try {
-              const message = await armaPingChannel.messages.fetch(
-                settings.pingMessageId,
-              );
-              await message.delete();
-            } catch (error) { }
-
-            Settings.set('pingMessageId', undefined);
-          }
-        }
+      if (forceNewMessage && reforgerMessageId) {
+        console.log(`Deleting old server status message`);
+        const message = await serverViewerChannel.messages.fetch(reforgerMessageId);
+        await message.delete();
       }
-    }
-  }
 
-  private async removeErrorMessage(channel: TextChannel) {
-    const errorMessageId = Settings.get().errorMessageId;
-    if (errorMessageId) {
-      const message = await channel.messages.fetch(errorMessageId);
-      await message.delete();
-
-      Settings.set('errorMessageId', undefined);
+      console.log(`Posting new server status message`);
+      const embed = await this.createRichEmbed(query);
+      serverViewerChannel
+        .send({ embeds: [embed] })
+        .then((newMessage) => {
+          Settings.set('reforgerMessageId', newMessage.id);
+        })
+        .catch((error) => {
+          console.error('Failed to create a new message.');
+          console.error(error);
+        });
     }
   }
 
@@ -374,29 +311,30 @@ export class BotGateway {
 
   private get query(): Promise<QueryResult | undefined> {
     return new Promise((resolve) => {
-      this.server
+      this.a3Server
         .queryServer()
         .then((query) => {
           if (query) {
             resolve(query);
           } else {
-            this.refreshFails++;
-            console.warn(
-              `Failed to refresh server info.`,
-              `Remaining retries: ${this.refreshFails}/${this.maxRefreshFails}`,
-            );
-            if (this.refreshFails >= this.maxRefreshFails) {
-              this.refreshFails = 0;
-              try {
-                const discordClient = this.discordProvider.getClient();
-                const armaPingChannel: TextChannel =
-                  discordClient.channels.cache.get(
-                    process.env.ARMA_PINGS_CHANNEL_ID,
-                  ) as TextChannel;
-              } catch (error) { }
-              console.error('Failed to refresh server info, emitting error.');
-              resolve(undefined);
-            }
+            console.warn(`Failed to refresh server info.`);
+          }
+        })
+        .catch(() => {
+          console.log('Server is offline');
+        });
+    });
+  }
+
+  private get queryReforger(): Promise<QueryResult | undefined> {
+    return new Promise((resolve) => {
+      this.reforgerServer
+        .queryServer()
+        .then((query) => {
+          if (query) {
+            resolve(query);
+          } else {
+            console.warn(`Failed to refresh server info.`);
           }
         })
         .catch(() => {

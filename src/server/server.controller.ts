@@ -5,7 +5,7 @@ import Server from '../helpers/server'
 @Controller('server')
 export class ServerController {
 
-  private server = new Server(process.env.IP, parseInt(process.env.PORT));
+  private server = new Server(process.env.IP, parseInt(process.env.A3PORT));
 
   @Get()
   async queryServer(): Promise<QueryResult | undefined> {
