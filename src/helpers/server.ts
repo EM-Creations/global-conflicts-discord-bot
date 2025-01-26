@@ -1,6 +1,6 @@
 import * as gamedig from 'gamedig';
 
-export default class ArmA3Server {
+export default class Server {
   public query?: gamedig.QueryResult;
 
   private ip: string;
@@ -14,12 +14,15 @@ export default class ArmA3Server {
   }
 
   public queryServer(): Promise<gamedig.QueryResult | undefined> {
+    const dig = new gamedig.GameDig();
+
     return new Promise((resolve) => {
-      gamedig
+      dig
         .query({
           host: this.ip,
           port: this.port,
           type: this.type,
+          givenPortOnly: true,
         })
         .then((query) => {
           this.query = query;

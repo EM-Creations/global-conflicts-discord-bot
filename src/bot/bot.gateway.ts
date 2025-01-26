@@ -217,51 +217,51 @@ export class BotGateway {
     const a3MessageId = Settings.get().a3MessageId;
     const reforgerMessageId = Settings.get().reforgerMessageId
 
-    const query = await this.query;
+    // const query = await this.query;
     const queryReforger = await this.queryReforger;
 
     let botError = false;
 
-    if (a3MessageId && !forceNewMessage) {
-      console.log(`old server status message id found ${a3MessageId}`);
-      try {
-        const oldMessage = await serverViewerChannel.messages.fetch(a3MessageId);
-        const embed = await this.createRichEmbed(query);
+    // if (a3MessageId && !forceNewMessage) {
+    //   console.log(`old server status message id found ${a3MessageId}`);
+    //   try {
+    //     const oldMessage = await serverViewerChannel.messages.fetch(a3MessageId);
+    //     const embed = await this.createRichEmbed(query);
 
-        const editing = oldMessage.edit({ embeds: [embed] });
-        editing
-          .then(() => {
-            console.log(`server status message edited`);
-          })
-          .catch((error) => {
-            botError = true;
-            console.error(`Failed to edit current message, id: ${a3MessageId}.`);
-            console.error(error);
-          });
-      } catch (error) {
-        console.log(`Error trying to get old server status message `);
-        console.error(error);
-      }
-    } else {
-      if (forceNewMessage && a3MessageId) {
-        console.log(`Deleting old server status message`);
-        const message = await serverViewerChannel.messages.fetch(a3MessageId);
-        await message.delete();
-      }
+    //     const editing = oldMessage.edit({ embeds: [embed] });
+    //     editing
+    //       .then(() => {
+    //         console.log(`server status message edited`);
+    //       })
+    //       .catch((error) => {
+    //         botError = true;
+    //         console.error(`Failed to edit current message, id: ${a3MessageId}.`);
+    //         console.error(error);
+    //       });
+    //   } catch (error) {
+    //     console.log(`Error trying to get old server status message `);
+    //     console.error(error);
+    //   }
+    // } else {
+    //   if (forceNewMessage && a3MessageId) {
+    //     console.log(`Deleting old server status message`);
+    //     const message = await serverViewerChannel.messages.fetch(a3MessageId);
+    //     await message.delete();
+    //   }
 
-      console.log(`Posting new server status message`);
-      const embed = await this.createRichEmbed(query);
-      serverViewerChannel
-        .send({ embeds: [embed] })
-        .then((newMessage) => {
-          Settings.set('a3MessageId', newMessage.id);
-        })
-        .catch((error) => {
-          botError = true;
-          console.error('Failed to create a new message.');
-          console.error(error);
-        });
-    }
+    //   console.log(`Posting new server status message`);
+    //   const embed = await this.createRichEmbed(query);
+    //   serverViewerChannel
+    //     .send({ embeds: [embed] })
+    //     .then((newMessage) => {
+    //       Settings.set('a3MessageId', newMessage.id);
+    //     })
+    //     .catch((error) => {
+    //       botError = true;
+    //       console.error('Failed to create a new message.');
+    //       console.error(error);
+    //     });
+    // }
 
     if (reforgerMessageId && !forceNewMessage) {
       console.log(`old server status message id found ${reforgerMessageId}`);
@@ -291,7 +291,7 @@ export class BotGateway {
       }
 
       console.log(`Posting new server status message`);
-      const embed = await this.createRichEmbed(query);
+      const embed = await this.createRichEmbed(queryReforger);
       serverViewerChannel
         .send({ embeds: [embed] })
         .then((newMessage) => {
@@ -307,12 +307,13 @@ export class BotGateway {
     if (botError) {
       this.setActivity('botError');
     } else {
-      if (query) {
-        this.setActivity('ok', query);
-      } else if (queryReforger) {
+      // if (query) {
+      //   this.setActivity('ok', query);
+      // } else 
+      if (queryReforger) {
         this.setActivity('ok', queryReforger, true);
       } else {
-        this.setActivity('serverError', query)
+        this.setActivity('serverError', queryReforger)
       }
     }
   }
@@ -337,6 +338,7 @@ export class BotGateway {
         })
         .catch(() => {
           console.log('Server is offline');
+          resolve(undefined);
         });
     });
   }
@@ -349,13 +351,13 @@ export class BotGateway {
           if (query) {
             fs.readFile(process.env.REFORGER_SERVER_ADMIN_STATS_FILE, 'utf-8', function(err, data) {
               if (err) {
-                console.warn(`Failed to load player list.`);
+                console.log(`Failed to load player list.`);
                 throw new Error();
               }
               const obj = JSON.parse(data);
               query.players = Object.values(obj.connected_players).map(p => {
                 if (typeof p !== "string") {
-                  console.warn(`Failed to parse player list.`);
+                  console.log(`Failed to parse player list.`);
                   throw new Error();
                 }
                 return {
@@ -369,11 +371,15 @@ export class BotGateway {
               resolve(query);
             })
           } else {
-            console.warn(`Failed to refresh server info.`);
+            console.log(`Failed to refresh server info.`);
           }
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(process.env.REFORGERPORT)
+          console.log(parseInt(process.env.REFORGERPORT))
+          console.log(err);
           console.log('Server is offline');
+          resolve(undefined);
         });
     });
   }
@@ -496,7 +502,8 @@ export class BotGateway {
     } else {
       let missionType = 'undefined';
       let typeLength = 2;
-      const gameName: string = query.raw.game;
+      const raw: any = query.raw
+      const gameName: string = raw.game;
       if (gameName.substring(0, 5) == 'COTVT') {
         missionType = 'COTVT';
         typeLength = 5;
@@ -598,7 +605,7 @@ export class BotGateway {
           {
             inline: true,
             name: locale.mission,
-            value: query.raw.game,
+            value: raw.game,
           },
           {
             inline: true,
@@ -767,7 +774,8 @@ export class BotGateway {
           }
           name = `${missionType} - ${missionName} on ${query.map} (${query.players.length}/${missionSlots})`;
         } else {
-          name = `${query.raw.game} on ${query.map} (${query.players.length}/${query.maxplayers})`;
+          const raw: any = query.raw;
+          name = `${raw.game} on ${query.map} (${query.players.length}/${query.maxplayers})`;
         }
 
         if (!query.map) {
