@@ -3,6 +3,7 @@ import { DiscordClientProvider, On, Once } from '@discord-nestjs/core';
 import { Injectable, Logger } from '@nestjs/common';
 
 import { ActionRowBuilder, ActivityType, EmbedBuilder, Interaction, StringSelectMenuBuilder, TextChannel } from 'discord.js';
+import * as fs from 'fs';
 import { Player, QueryResult } from 'gamedig';
 import * as mongo from 'mongodb';
 import { InjectDb } from 'nest-mongodb';
@@ -219,6 +220,8 @@ export class BotGateway {
     const query = await this.query;
     const queryReforger = await this.queryReforger;
 
+    let botError = false;
+
     if (a3MessageId && !forceNewMessage) {
       console.log(`old server status message id found ${a3MessageId}`);
       try {
@@ -229,10 +232,9 @@ export class BotGateway {
         editing
           .then(() => {
             console.log(`server status message edited`);
-            this.setActivity(query ? 'ok' : 'serverError', query);
           })
           .catch((error) => {
-            this.setActivity('botError');
+            botError = true;
             console.error(`Failed to edit current message, id: ${a3MessageId}.`);
             console.error(error);
           });
@@ -253,10 +255,9 @@ export class BotGateway {
         .send({ embeds: [embed] })
         .then((newMessage) => {
           Settings.set('a3MessageId', newMessage.id);
-          this.setActivity(query ? 'ok' : 'serverError', query);
         })
         .catch((error) => {
-          this.setActivity('botError');
+          botError = true;
           console.error('Failed to create a new message.');
           console.error(error);
         });
@@ -266,7 +267,7 @@ export class BotGateway {
       console.log(`old server status message id found ${reforgerMessageId}`);
       try {
         const oldMessage = await serverViewerChannel.messages.fetch(reforgerMessageId);
-        const embed = await this.createRichEmbed(queryReforger);
+        const embed = await this.createRichEmbed(queryReforger, this.maintenanceMode, true);
 
         const editing = oldMessage.edit({ embeds: [embed] });
         editing
@@ -274,6 +275,7 @@ export class BotGateway {
             console.log(`server status message edited`);
           })
           .catch((error) => {
+            botError = true;
             console.error(`Failed to edit current message, id: ${reforgerMessageId}.`);
             console.error(error);
           });
@@ -296,9 +298,22 @@ export class BotGateway {
           Settings.set('reforgerMessageId', newMessage.id);
         })
         .catch((error) => {
+          botError = true;
           console.error('Failed to create a new message.');
           console.error(error);
         });
+    }
+
+    if (botError) {
+      this.setActivity('botError');
+    } else {
+      if (query) {
+        this.setActivity('ok', query);
+      } else if (queryReforger) {
+        this.setActivity('ok', queryReforger, true);
+      } else {
+        this.setActivity('serverError', query)
+      }
     }
   }
 
@@ -332,7 +347,27 @@ export class BotGateway {
         .queryServer()
         .then((query) => {
           if (query) {
-            resolve(query);
+            fs.readFile(process.env.REFORGER_SERVER_ADMIN_STATS_FILE, 'utf-8', function(err, data) {
+              if (err) {
+                console.warn(`Failed to load player list.`);
+                throw new Error();
+              }
+              const obj = JSON.parse(data);
+              query.players = Object.values(obj.connected_players).map(p => {
+                if (typeof p !== "string") {
+                  console.warn(`Failed to parse player list.`);
+                  throw new Error();
+                }
+                return {
+                  name: p,
+                  raw: {
+                    time: 0,
+                    score: 0
+                  }
+                }
+              })
+              resolve(query);
+            })
           } else {
             console.warn(`Failed to refresh server info.`);
           }
@@ -346,6 +381,82 @@ export class BotGateway {
   private getDescriptionRepeater(text: string): string {
     // Repeat the dashes for 62.5% of the text length
     return '─'.repeat(text.length * 0.625);
+  }
+
+  private async getReforgerFields(query: QueryResult): Promise<IField[]> {
+    const playerListData = ['```py'];
+    // Check if the embed doesn't go over the maximum allowed Discord value
+    let hasPlayers = true;
+    if (
+      query.players.length &&
+      this.getPlayerListCharacterCount(query.players) < 1024
+    ) {
+      // Sort alphabetically
+      query.players.sort((a, b) =>
+        a.name > b.name ? 1 : b.name > a.name ? -1 : 0,
+      );
+      query.players.forEach((player) => {
+        playerListData.push(this.getPlayerDisplayText(player));
+      });
+    } else if (query.players.length) {
+      playerListData.push(locale.tooManyPlayers);
+    } else {
+      playerListData.push(locale.noPlayers);
+      hasPlayers = false;
+    }
+    if (!hasPlayers) {
+      return [
+        {
+          inline: true,
+          name: locale.statuses.status,
+          value: locale.statuses.online,
+        },
+        {
+          inline: true,
+          name: 'State',
+          value: 'No Mission Loaded',
+        },
+      ];
+    } else {
+      playerListData.push('```');
+      return [
+        {
+          inline: false,
+          name: locale.statuses.status,
+          value: locale.statuses.online,
+        },
+        {
+          inline: true,
+          name: 'Mission Type',
+          value: "Custom",
+        },
+        {
+          inline: true,
+          name: locale.mission,
+          value: query.map,
+        },
+        {
+          inline: true,
+          name: '\u200b',
+          value: '\u200b',
+        },
+        {
+          inline: true,
+          name: locale.playerCount,
+          value: `${query.players.length}/${query.maxplayers}`,
+        },
+        {
+          inline: true,
+          name: '\u200b',
+          value: '\u200b',
+        },
+        {
+          inline: false,
+          name: locale.playerList,
+          value: playerListData.join('\n'),
+        },
+      ];
+    }   
   }
 
   private async getSuccessFields(query: QueryResult): Promise<IField[]> {
@@ -555,20 +666,35 @@ export class BotGateway {
     ];
   }
 
-  public async createRichEmbed(query?: QueryResult, maintenanceMode?: boolean) {
+  public async createRichEmbed(query?: QueryResult, maintenanceMode?: boolean, isReforger: boolean = false) {
     if (query) {
-      return new EmbedBuilder({
-        color: COLOR_OK,
-        // As the ─ is just a little larger than the actual letters, it isn't equal to the letter count
-        description: this.getDescriptionRepeater(query.name),
-        fields: await this.getSuccessFields(query),
-        timestamp: new Date(),
-        thumbnail: {
-          url: 'https://globalconflicts.net/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbanner.8d01371c.png&w=1080&q=100',
-        },
-        //title: query.name,
-        title: locale.serverName,
-      });
+      if (isReforger) {
+        return new EmbedBuilder({
+          color: COLOR_OK,
+          // As the ─ is just a little larger than the actual letters, it isn't equal to the letter count
+          description: this.getDescriptionRepeater(query.name),
+          fields: await this.getReforgerFields(query),
+          timestamp: new Date(),
+          thumbnail: {
+            url: 'https://globalconflicts.net/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbanner.8d01371c.png&w=1080&q=100',
+          },
+          //title: query.name,
+          title: locale.armaReforgerServerName,
+        });
+      } else {
+        return new EmbedBuilder({
+          color: COLOR_OK,
+          // As the ─ is just a little larger than the actual letters, it isn't equal to the letter count
+          description: this.getDescriptionRepeater(query.name),
+          fields: await this.getSuccessFields(query),
+          timestamp: new Date(),
+          thumbnail: {
+            url: 'https://globalconflicts.net/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbanner.8d01371c.png&w=1080&q=100',
+          },
+          //title: query.name,
+          title: locale.arma3ServerName,
+        });
+      }
     } else if (maintenanceMode) {
       return new EmbedBuilder({
         color: COLOR_MAINTENANCE,
@@ -591,9 +717,10 @@ export class BotGateway {
   public async setActivity(
     status: 'ok' | 'serverError' | 'botError' | 'maintenance',
     query?: QueryResult,
+    reforger = false
   ) {
     const _client = await this.discordProvider.getClient();
-    if (query && status === 'ok') {
+    if (query && status === 'ok' && !reforger) {
       if (query.players.length) {
         let missionType = 'undefined';
         let typeLength = 2;
@@ -669,6 +796,16 @@ export class BotGateway {
           ],
         });
       }
+    } else if (query && status === 'ok' && reforger) {
+      _client.user.setPresence({
+        status: 'online',
+        activities: [
+          {
+            name: `${query.map} (${query.players.length}/${query.maxplayers})`,
+            type: ActivityType.Playing
+          },
+        ],
+      });
     } else if (status === 'serverError') {
       _client.user.setPresence({
         status: 'dnd',
