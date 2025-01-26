@@ -42,7 +42,7 @@ export default async function MayPostTeamspeakViewer(discordClient: Client<boole
         }
       }
       const ts3channel: TextChannel = discordClient.channels.cache.get(
-        process.env.SERVER_VIEWER_CHANNEL_ID,
+        process.env.TS3_CHANNEL_ID,
       ) as TextChannel;
       const messageManager = ts3channel.messages;
       const messages = await messageManager.channel.messages.fetch({ limit: 99 });
