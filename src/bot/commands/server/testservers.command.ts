@@ -45,6 +45,10 @@ import { ReforgerServerSubCommand } from '../subcommands/reforger.subcommand';
     UseGroup(
       { name: 'update_mods', description: 'Triggers Swifty update process. Can take a while.' },
       ModRouletteTestServerSubCommand
+    ),
+    UseGroup(
+      { name: 'restart-nobackend', description: 'Restarts the reforger server with no BI backend.'},
+      ReforgerServerSubCommand
     )
   ]
 })
