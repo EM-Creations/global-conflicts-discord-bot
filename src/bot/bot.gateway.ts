@@ -17,7 +17,6 @@ import MayPostTeamspeakViewer from '../polling/teamspeak/teamspeak';
 export class BotGateway {
   private readonly logger = new Logger(BotGateway.name);
   private maintenanceMode: boolean;
-  private a3Server = new Server(process.env.IP, parseInt(process.env.A3PORT), 'arma3');
   private reforgerServer = new Server(process.env.IP, parseInt(process.env.REFORGERPORT), 'armareforger')
   constructor(
     private readonly discordProvider: DiscordClientProvider,
@@ -214,60 +213,17 @@ export class BotGateway {
       return;
     }
 
-    const a3MessageId = Settings.get().a3MessageId;
     const reforgerMessageId = Settings.get().reforgerMessageId
 
-    // const query = await this.query;
     const queryReforger = await this.queryReforger;
 
     let botError = false;
-
-    // if (a3MessageId && !forceNewMessage) {
-    //   console.log(`old server status message id found ${a3MessageId}`);
-    //   try {
-    //     const oldMessage = await serverViewerChannel.messages.fetch(a3MessageId);
-    //     const embed = await this.createRichEmbed(query);
-
-    //     const editing = oldMessage.edit({ embeds: [embed] });
-    //     editing
-    //       .then(() => {
-    //         console.log(`server status message edited`);
-    //       })
-    //       .catch((error) => {
-    //         botError = true;
-    //         console.error(`Failed to edit current message, id: ${a3MessageId}.`);
-    //         console.error(error);
-    //       });
-    //   } catch (error) {
-    //     console.log(`Error trying to get old server status message `);
-    //     console.error(error);
-    //   }
-    // } else {
-    //   if (forceNewMessage && a3MessageId) {
-    //     console.log(`Deleting old server status message`);
-    //     const message = await serverViewerChannel.messages.fetch(a3MessageId);
-    //     await message.delete();
-    //   }
-
-    //   console.log(`Posting new server status message`);
-    //   const embed = await this.createRichEmbed(query);
-    //   serverViewerChannel
-    //     .send({ embeds: [embed] })
-    //     .then((newMessage) => {
-    //       Settings.set('a3MessageId', newMessage.id);
-    //     })
-    //     .catch((error) => {
-    //       botError = true;
-    //       console.error('Failed to create a new message.');
-    //       console.error(error);
-    //     });
-    // }
 
     if (reforgerMessageId && !forceNewMessage) {
       console.log(`old server status message id found ${reforgerMessageId}`);
       try {
         const oldMessage = await serverViewerChannel.messages.fetch(reforgerMessageId);
-        const embed = await this.createRichEmbed(queryReforger, this.maintenanceMode, true);
+        const embed = await this.createRichEmbed(queryReforger, this.maintenanceMode);
 
         const editing = oldMessage.edit({ embeds: [embed] });
         editing
@@ -307,11 +263,8 @@ export class BotGateway {
     if (botError) {
       this.setActivity('botError');
     } else {
-      // if (query) {
-      //   this.setActivity('ok', query);
-      // } else 
       if (queryReforger) {
-        this.setActivity('ok', queryReforger, true);
+        this.setActivity('ok', queryReforger);
       } else {
         this.setActivity('serverError', queryReforger)
       }
@@ -323,24 +276,6 @@ export class BotGateway {
     setInterval(() => {
       this.startPolling();
     }, parseInt(timeToWait) * 1000);
-  }
-
-  private get query(): Promise<QueryResult | undefined> {
-    return new Promise((resolve) => {
-      this.a3Server
-        .queryServer()
-        .then((query) => {
-          if (query) {
-            resolve(query);
-          } else {
-            console.warn(`Failed to refresh server info.`);
-          }
-        })
-        .catch(() => {
-          console.log('Server is offline');
-          resolve(undefined);
-        });
-    });
   }
 
   private get queryReforger(): Promise<QueryResult | undefined> {
@@ -673,35 +608,20 @@ export class BotGateway {
     ];
   }
 
-  public async createRichEmbed(query?: QueryResult, maintenanceMode?: boolean, isReforger: boolean = false) {
+  public async createRichEmbed(query?: QueryResult, maintenanceMode?: boolean) {
     if (query) {
-      if (isReforger) {
-        return new EmbedBuilder({
-          color: COLOR_OK,
-          // As the ─ is just a little larger than the actual letters, it isn't equal to the letter count
-          description: this.getDescriptionRepeater(query.name),
-          fields: await this.getReforgerFields(query),
-          timestamp: new Date(),
-          thumbnail: {
-            url: 'https://globalconflicts.net/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbanner.8d01371c.png&w=1080&q=100',
-          },
-          //title: query.name,
-          title: locale.armaReforgerServerName,
-        });
-      } else {
-        return new EmbedBuilder({
-          color: COLOR_OK,
-          // As the ─ is just a little larger than the actual letters, it isn't equal to the letter count
-          description: this.getDescriptionRepeater(query.name),
-          fields: await this.getSuccessFields(query),
-          timestamp: new Date(),
-          thumbnail: {
-            url: 'https://globalconflicts.net/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbanner.8d01371c.png&w=1080&q=100',
-          },
-          //title: query.name,
-          title: locale.arma3ServerName,
-        });
-      }
+      return new EmbedBuilder({
+        color: COLOR_OK,
+        // As the ─ is just a little larger than the actual letters, it isn't equal to the letter count
+        description: this.getDescriptionRepeater(query.name),
+        fields: await this.getReforgerFields(query),
+        timestamp: new Date(),
+        thumbnail: {
+          url: 'https://globalconflicts.net/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbanner.8d01371c.png&w=1080&q=100',
+        },
+        //title: query.name,
+        title: locale.armaReforgerServerName,
+      });
     } else if (maintenanceMode) {
       return new EmbedBuilder({
         color: COLOR_MAINTENANCE,
@@ -723,88 +643,10 @@ export class BotGateway {
 
   public async setActivity(
     status: 'ok' | 'serverError' | 'botError' | 'maintenance',
-    query?: QueryResult,
-    reforger = false
+    query?: QueryResult
   ) {
     const _client = await this.discordProvider.getClient();
-    if (query && status === 'ok' && !reforger) {
-      if (query.players.length) {
-        let missionType = 'undefined';
-        let typeLength = 2;
-        const gameName: string = query.raw['game'];
-        if (gameName.substring(0, 5) == 'COTVT') {
-          missionType = 'COTVT';
-          typeLength = 5;
-        } else {
-          switch (gameName ? gameName.substring(0, 2) : 'undefined') {
-            case 'CO': {
-              missionType = 'COOP';
-              break;
-            }
-            case 'TV': {
-              missionType = 'TVT';
-              typeLength = 3;
-              break;
-            }
-            case 'LO': {
-              missionType = 'LOL';
-              typeLength = 3;
-              break;
-            }
-            default: {
-              missionType = 'undefined';
-            }
-          }
-        }
-
-        let missionName = 'undefined';
-        let missionSlots = '64';
-        let name = `Unknown mission on ${query.map}`;
-        if (missionType !== 'undefined') {
-          const missionSlotsSearch = gameName.match(/[A-z]+([0-9]+)/);
-          if (missionSlotsSearch && typeLength) {
-            missionSlots = missionSlotsSearch[1];
-            const missionNameSlice = gameName.slice(
-              typeLength + missionSlots.length,
-            );
-            const missionNameSearch = missionNameSlice.match(/\w+.+/);
-            missionName = missionNameSearch
-              ? missionNameSearch[0].replace(/_/g, ' ')
-              : 'undefined';
-          }
-          name = `${missionType} - ${missionName} on ${query.map} (${query.players.length}/${missionSlots})`;
-        } else {
-          const raw: any = query.raw;
-          name = `${raw.game} on ${query.map} (${query.players.length}/${query.maxplayers})`;
-        }
-
-        if (!query.map) {
-          name = `${locale.noMap} (${query.players.length}/${query.maxplayers})`;
-        }
-
-        _client.user.setPresence({
-          status: 'online',
-          activities: [
-            {
-              name,
-              type: ActivityType.Playing
-            },
-          ],
-        });
-      } else {
-        const name = `${locale.noMap}`;
-
-        _client.user.setPresence({
-          status: 'online',
-          activities: [
-            {
-              name,
-              type: ActivityType.Playing
-            },
-          ],
-        });
-      }
-    } else if (query && status === 'ok' && reforger) {
+    if (query && status === 'ok') {
       _client.user.setPresence({
         status: 'online',
         activities: [
