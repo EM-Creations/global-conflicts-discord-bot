@@ -307,6 +307,7 @@ export class BotGateway {
             })
           } else {
             console.log(`Failed to refresh server info.`);
+            resolve(undefined);
           }
         })
         .catch((err) => {
