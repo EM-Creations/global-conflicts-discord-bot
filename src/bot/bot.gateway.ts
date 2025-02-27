@@ -303,6 +303,7 @@ export class BotGateway {
                   }
                 }
               })
+              query.map = obj.mission;
               resolve(query);
             })
           } else {
