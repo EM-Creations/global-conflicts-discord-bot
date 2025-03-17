@@ -50,11 +50,6 @@ export class PonyBotListener {
       'https://i.imgur.com/umDDNtD.mp4',
       'https://i.imgur.com/sDRCWjX.mp4',
     ],
-    gandhi: [
-      'https://i.imgur.com/aGjjk2W.jpg',
-      'https://i.imgur.com/Qp2Lrft.jpg',
-      'https://i.imgur.com/orPodRT.jpg',
-    ],
     congrats: ['https://i.imgur.com/o3KwHTO.jpg'],
     classic: ['https://i.imgur.com/cuOo6gN.gif'],
     wade: [
