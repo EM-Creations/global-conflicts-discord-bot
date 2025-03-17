@@ -9,7 +9,6 @@ import { MissionsController } from './missions/missions.controller';
 import { MongoModule } from 'nest-mongodb';
 import { DiscordModule } from '@discord-nestjs/core';
 import { GatewayIntentBits } from 'discord.js';
- 
 
 @Module({
   imports: [
@@ -24,12 +23,13 @@ import { GatewayIntentBits } from 'discord.js';
             removeCommandsBefore: true,
           },
         ],
-
         discordClientOptions: {
           intents: [
             GatewayIntentBits.Guilds,
             GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.GuildMembers
+            GatewayIntentBits.GuildMembers,
+            GatewayIntentBits.MessageContent,
+            GatewayIntentBits.GuildVoiceStates, // To track voice state changes
           ],
         },
       }),
