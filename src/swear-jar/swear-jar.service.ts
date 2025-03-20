@@ -1,16 +1,18 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { DiscordClientProvider, Once, On } from '@discord-nestjs/core';
 import { TextChannel } from 'discord.js';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { MongoClient, Collection } from 'mongodb';
 
 @Injectable()
 export class SwearJarService implements OnModuleInit {
   private swearJarCount = 0;
-  private readonly SWEAR_JAR_FILE_PATH = path.join(process.cwd(), 'swearJar.json');
-  private readonly TRIGGER_TERMS = ['uo', 'united operations', '1.3'];
+  private swearJarCollection: Collection;
 
-  constructor(private readonly discordProvider: DiscordClientProvider) {}
+  constructor(private readonly discordProvider: DiscordClientProvider) {
+    const mongoClient = new MongoClient('mongodb://localhost:27017');
+    const db = mongoClient.db('ponybot');
+    this.swearJarCollection = db.collection('swearJar');
+  }
 
   async onModuleInit() {
     await this.loadSwearJarData();
@@ -28,16 +30,20 @@ export class SwearJarService implements OnModuleInit {
     const content = message.content.toLowerCase();
     const channel = message.channel;
 
+    // Load trigger terms from MongoDB
+    const triggerDocs = await this.swearJarCollection
+      .find({ type: 'trigger' })
+      .toArray();
+    const triggerTerms = triggerDocs.map(doc => doc.term);
+
     // Split into words for single-word checks
     const words = content.split(/\s+/).filter(word => word.length > 0);
 
-    // Check for trigger terms: exact word match for single words, full phrase match for multi-word terms
-    const termFound = this.TRIGGER_TERMS.some(term => {
+    // Check for trigger terms
+    const termFound = triggerTerms.some(term => {
       if (term.includes(' ')) {
-        // For multi-word terms, check the full content
         return content.includes(term);
       } else {
-        // For single-word terms, check the word list
         return words.includes(term);
       }
     });
@@ -58,20 +64,24 @@ export class SwearJarService implements OnModuleInit {
 
   private async loadSwearJarData() {
     try {
-      const data = await fs.readFile(this.SWEAR_JAR_FILE_PATH, 'utf-8');
-      const parsed = JSON.parse(data);
-      this.swearJarCount = parsed.count || 0;
+      const countDoc = await this.swearJarCollection.findOne({ type: 'count' });
+      this.swearJarCount = countDoc?.value || 0;
       console.log(`Swear Jar data loaded: ${this.swearJarCount} GC Bucks`);
     } catch (error) {
-      console.log('No existing Swear Jar data found, starting fresh.');
+      console.log('Error loading Swear Jar data, starting fresh:', error);
       this.swearJarCount = 0;
+      await this.saveSwearJarData(); // Initialize the count document if it doesn’t exist
     }
   }
 
   private async saveSwearJarData() {
     try {
-      await fs.writeFile(this.SWEAR_JAR_FILE_PATH, JSON.stringify({ count: this.swearJarCount }, null, 2), 'utf-8');
-      console.log('Swear Jar data saved to file.');
+      await this.swearJarCollection.updateOne(
+        { type: 'count' },
+        { $set: { value: this.swearJarCount } },
+        { upsert: true } // Create the document if it doesn’t exist
+      );
+      console.log('Swear Jar data saved to MongoDB.');
     } catch (error) {
       console.error('Error saving Swear Jar data:', error);
     }
