@@ -42,7 +42,7 @@ export class ReforgerServerSubCommand {
             const data = fs.readFileSync(process.env.REFORGER_SERVER_CONFIG_FILE, 'utf8');
             let config = JSON.parse(data);
             config.game.scenarioId = options.missionguid;
-            fs.writeFileSync(process.env.REFORGER_SERVER_CONFIG_FILE, JSON.stringify(config));
+            fs.writeFileSync(process.env.REFORGER_SERVER_CONFIG_FILE, JSON.stringify(config, null, "\t"));
         }
 
         if (action == "restart") {
