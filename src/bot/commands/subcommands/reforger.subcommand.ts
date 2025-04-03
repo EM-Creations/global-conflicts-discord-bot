@@ -9,7 +9,7 @@ import * as fs from 'fs';
 
 class ReforgerSubCommandParams {
     @Param({ description: 'Mission GUID', required: false })
-    missionGuid: string;
+    missionguid: string;
 }
 
 @SubCommand({ name: 'reforger', description: 'Starts/Restarts the reforger server.', })
@@ -37,11 +37,12 @@ export class ReforgerServerSubCommand {
         }
         let child: ChildProcessWithoutNullStreams;
 
-        if (options.missionGuid && process.env.REFORGER_SERVER_CONFIG_FILE) {
-            channel.send(member?.user?.username + ' set scenario id to ' + options.missionGuid);
+        if (options.missionguid && process.env.REFORGER_SERVER_CONFIG_FILE) {
+            channel.send(member?.user?.username + ' set scenario id to ' + options.missionguid);
             const data = fs.readFileSync(process.env.REFORGER_SERVER_CONFIG_FILE, 'utf8');
             let config = JSON.parse(data);
-            config.game.scenarioId = options.missionGuid;
+            config.game.scenarioId = options.missionguid;
+            fs.writeFileSync(process.env.REFORGER_SERVER_CONFIG_FILE, JSON.stringify(config));
         }
 
         if (action == "restart") {
