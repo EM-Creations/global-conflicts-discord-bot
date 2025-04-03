@@ -1,18 +1,23 @@
 import { SlashCommandPipe } from "@discord-nestjs/common";
-import { DiscordClientProvider, EventParams, Handler, IA, SubCommand } from "@discord-nestjs/core";
+import { DiscordClientProvider, EventParams, Handler, IA, InteractionEvent, Param, SubCommand } from "@discord-nestjs/core";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { ChatInputCommandInteraction, ClientEvents, GuildMemberRoleManager, TextChannel } from "discord.js";
 import { isEmpty } from "rxjs";
 import { BotGateway } from "src/bot/bot.gateway";
 import permissionCheckReforger from "src/helpers/reforger_command_perms_check";
+import * as fs from 'fs';
+
+class ReforgerSubCommandParams {
+    @Param({ description: 'Mission GUID', required: false })
+    missionGuid: string;
+}
 
 @SubCommand({ name: 'reforger', description: 'Starts/Restarts the reforger server.', })
 export class ReforgerServerSubCommand {
     constructor(private readonly discordProvider: DiscordClientProvider) { }
 
     @Handler()
-    onServerSelectCommand(
-        @EventParams() args: ClientEvents['interactionCreate']): string {
+    onServerSelectCommand(@InteractionEvent(SlashCommandPipe) options: ReforgerSubCommandParams, @EventParams() args: ClientEvents['interactionCreate'], ): string {
         const member = args[0].member;
         const channel = args[0].channel as TextChannel;
 
@@ -31,6 +36,14 @@ export class ReforgerServerSubCommand {
             action = args[0].options["_group"];
         }
         let child: ChildProcessWithoutNullStreams;
+
+        if (options.missionGuid && process.env.REFORGER_SERVER_CONFIG_FILE) {
+            channel.send(member?.user?.username + ' set scenario id to ' + options.missionGuid);
+            const data = fs.readFileSync(process.env.REFORGER_SERVER_CONFIG_FILE, 'utf8');
+            let config = JSON.parse(data);
+            config.game.scenarioId = options.missionGuid;
+        }
+
         if (action == "restart") {
             channel.send(member?.user?.username + ' restarted reforger server');
             child = spawn('powershell.exe', [
