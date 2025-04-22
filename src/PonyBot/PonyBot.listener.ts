@@ -18,7 +18,7 @@ export class PonyBotListener {
   private triggerImagesCollection: Collection;
 
   constructor() {
-    const mongoClient = new MongoClient('mongodb://localhost:27017');
+    const mongoClient = new MongoClient(process.env.MONGO_HOST);
     const db = mongoClient.db('ponybot');
     this.triggerImagesCollection = db.collection('triggerImages');
   }

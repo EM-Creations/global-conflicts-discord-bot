@@ -9,7 +9,7 @@ export class SwearJarService implements OnModuleInit {
   private swearJarCollection: Collection;
 
   constructor(private readonly discordProvider: DiscordClientProvider) {
-    const mongoClient = new MongoClient('mongodb://localhost:27017');
+    const mongoClient = new MongoClient(process.env.MONGO_HOST);
     const db = mongoClient.db('ponybot');
     this.swearJarCollection = db.collection('swearJar');
   }
