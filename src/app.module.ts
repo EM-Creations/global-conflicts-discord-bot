@@ -2,13 +2,13 @@ import { BotModule } from './bot/bot.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersController } from './users/users.controller';
-import { ServerController } from './server/server.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MissionsController } from './missions/missions.controller';
 import { MongoModule } from 'nest-mongodb';
 import { DiscordModule } from '@discord-nestjs/core';
 import { GatewayIntentBits } from 'discord.js';
+ 
 
 @Module({
   imports: [
@@ -23,13 +23,14 @@ import { GatewayIntentBits } from 'discord.js';
             removeCommandsBefore: true,
           },
         ],
+
         discordClientOptions: {
           intents: [
             GatewayIntentBits.Guilds,
             GatewayIntentBits.GuildMessages,
             GatewayIntentBits.GuildMembers,
             GatewayIntentBits.MessageContent,
-            GatewayIntentBits.GuildVoiceStates, // To track voice state changes
+            GatewayIntentBits.GuildVoiceStates,
           ],
         },
       }),
@@ -38,7 +39,7 @@ import { GatewayIntentBits } from 'discord.js';
     BotModule,
     MongoModule.forRoot(process.env.MONGO_HOST, 'prod'),
   ],
-  controllers: [UsersController, MissionsController, AppController, ServerController],
+  controllers: [UsersController, MissionsController, AppController],
   providers: [AppService],
 })
 export class AppModule {}
