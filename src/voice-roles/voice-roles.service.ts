@@ -12,18 +12,18 @@ export class VoiceRolesService implements OnModuleInit {
   private readonly logger = new Logger(VoiceRolesService.name);
 
   private readonly ROLE_MAP: RoleMap = {
-    '1345399702450999306': '1345400300261085258', // Voice channel ID: Role ID
-    '1345399724408307713': '1345400323547725895',
-    '1345399797162446868': '1345400347581218898',
-    '1345399827521081395': '1345400365687902260',
+    '1345427443485507595': '1383397735574667395', // Voice channel ID: Role ID
+    '1345427608145498122': '1383378111940399184',
+    '1345427903101538345': '1383397786627604491',
+    '1383360885057261628': '1383397817871106119',
   };
 
   // List of text channel IDs for message cleanup
   private readonly CLEANUP_CHANNEL_IDS: string[] = [
-    '1345421047054336042', // Replace with actual text channel IDs
-    '1345421543320064072',
-    '1345421564568404052',
-    '1345421588283260998',
+    '1383397063147913306', // Replace with actual text channel IDs
+    '1383376631992684574',
+    '1383397102469775390',
+    '1383397137525768222',
   ];
 
   constructor(private readonly discordProvider: DiscordClientProvider) {}
