@@ -10,8 +10,7 @@ import { InjectDb } from 'nest-mongodb';
 import { COLOR_ERROR, COLOR_MAINTENANCE, COLOR_OK } from '../helpers/colors';
 import locale from '../helpers/en';
 import Server from '../helpers/server';
-import Settings from '../polling/teamspeak/settings';
-import MayPostTeamspeakViewer from '../polling/teamspeak/teamspeak';
+import Settings from '../polling/settings';
 
 @Injectable()
 export class BotGateway {
@@ -205,8 +204,6 @@ export class BotGateway {
     const serverViewerChannel: TextChannel = discordClient.channels.cache.get(
       process.env.SERVER_VIEWER_CHANNEL_ID,
     ) as TextChannel;
-
-    await MayPostTeamspeakViewer(discordClient);
 
     if (this.maintenanceMode) {
       console.log('maintenanceMode');

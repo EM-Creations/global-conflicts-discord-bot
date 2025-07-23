@@ -28,7 +28,9 @@ import { GatewayIntentBits } from 'discord.js';
           intents: [
             GatewayIntentBits.Guilds,
             GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.GuildMembers
+            GatewayIntentBits.GuildMembers,
+            GatewayIntentBits.MessageContent,
+            GatewayIntentBits.GuildVoiceStates,
           ],
         },
       }),
