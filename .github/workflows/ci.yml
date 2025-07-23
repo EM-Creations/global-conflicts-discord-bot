@@ -1,0 +1,33 @@
+name: CI Build
+run-name: CI build by ${{ github.actor }} 🚀
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  issues: read
+  packages: read
+  pull-requests: write
+  statuses: read
+  security-events: write
+
+jobs:
+  Build-Windows:
+    uses: build.yml
+    with:
+      os: windows-latest
+
+  Build-Linux:
+    uses: build.yml
+    with:
+      os: ubuntu-latest
+
+  Build-Mac:
+    uses: build.yml
+    with:
+      os: macos-latest
