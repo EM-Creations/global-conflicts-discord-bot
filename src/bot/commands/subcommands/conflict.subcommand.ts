@@ -10,7 +10,7 @@ class ConflictSubCommandParams {
     missionguid: string;
 }
 
-@SubCommand({ name: 'main', description: 'Starts/Restarts the main server. This is the regular server for sessions.', })
+@SubCommand({ name: 'conflict', description: 'Starts/Restarts the conflict server. This is the server for weekday, non-organized gameplay.', })
 export class ConflictServerSubCommand {
     constructor(private readonly discordProvider: DiscordClientProvider) { }
 
