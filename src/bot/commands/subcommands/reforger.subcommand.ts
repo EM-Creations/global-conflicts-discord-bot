@@ -82,6 +82,43 @@ export class ReforgerServerSubCommand {
                     console.log(e);
                 }
             });
+        } else if (action == "restart-conflict") {
+            channel.send(member?.user?.username + ' restarted conflict server');
+            child = spawn('powershell.exe', [
+                `${process.env.MAIN_REFORGER_SERVER_START_SCRIPT_PATH}\\start-conflict.ps1`,
+            ]);
+            child.stdout.on('data', async function (data) {
+                try {
+                    if (data) {
+                        let text = '' + data;
+                        if (text.length > 0 && (
+                            text.includes('->') //||
+                            //text.includes('(E)') ||
+                            //text.includes('(W)')
+                        )) {
+                            await channel.send({content: text})
+                        }
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            });
+            child.stderr.on('data', async function (data) {
+                try {
+                    if (data) {
+                        let text = '' + data;
+                        if (text.length > 0 && (
+                            text.includes('->') //||
+                            //text.includes('(E)') ||
+                            //text.includes('(W)')
+                        )) {
+                            await channel.send({content: text})
+                        }
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            });
         } else if (action == "restart-nobackend") {
             channel.send(member?.user?.username + ' restarted reforger server without backend');
             child = spawn('powershell.exe', [

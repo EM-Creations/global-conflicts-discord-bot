@@ -49,6 +49,10 @@ import { ReforgerServerSubCommand } from '../subcommands/reforger.subcommand';
     UseGroup(
       { name: 'restart-nobackend', description: 'Restarts the reforger server with no BI backend.'},
       ReforgerServerSubCommand
+    ),
+    UseGroup(
+      { name: 'restart-conflict', description: 'Restarts the reforger server with the conflict config.'},
+      ReforgerServerSubCommand
     )
   ]
 })
