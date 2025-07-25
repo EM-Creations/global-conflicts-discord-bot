@@ -373,7 +373,7 @@ export class BotGateway {
         {
           inline: true,
           name: locale.mission,
-          value: query.map,
+          value: query.map || 'Unknown',
         },
         {
           inline: true,
