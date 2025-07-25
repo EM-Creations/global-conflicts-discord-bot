@@ -10,13 +10,8 @@ import {
   ClientEvents
 } from 'discord.js';
 
-import { FantasyTestServerSubCommand } from '../subcommands/fantasy-modpack.subcommand';
-import { MainTestServerSubCommand } from '../subcommands/main-modpack.subcommand';
 import { MainServerSubCommand } from '../subcommands/main.subcommand';
-import { WW2TestServerSubCommand } from '../subcommands/ww2-modpack.subcomand';
-import { CrossCommunityTestServerSubCommand } from '../subcommands/crosscommunity-modpack.subcommand';
-import { ModRouletteTestServerSubCommand } from '../subcommands/mod-roulette-modpack.subcommand';
-import { ReforgerServerSubCommand } from '../subcommands/reforger.subcommand';
+import { ConflictServerSubCommand } from '../subcommands/conflict.subcommand';
 
 @Command({
   name: 'server',
@@ -25,35 +20,13 @@ import { ReforgerServerSubCommand } from '../subcommands/reforger.subcommand';
     UseGroup(
       { name: 'restart', description: 'The server you want to interact with.' },
       MainServerSubCommand,
-      MainTestServerSubCommand,
-      WW2TestServerSubCommand,
-      FantasyTestServerSubCommand,
-      CrossCommunityTestServerSubCommand,
-      ModRouletteTestServerSubCommand,
-      ReforgerServerSubCommand
+      ConflictServerSubCommand
     ),
     UseGroup(
       { name: 'stop', description: 'The server you want to interact with.' },
-      MainTestServerSubCommand,
       MainServerSubCommand,
-      WW2TestServerSubCommand,
-      FantasyTestServerSubCommand,
-      CrossCommunityTestServerSubCommand,
-      ModRouletteTestServerSubCommand,
-      ReforgerServerSubCommand
+      ConflictServerSubCommand
     ),
-    UseGroup(
-      { name: 'update_mods', description: 'Triggers Swifty update process. Can take a while.' },
-      ModRouletteTestServerSubCommand
-    ),
-    UseGroup(
-      { name: 'restart-nobackend', description: 'Restarts the reforger server with no BI backend.'},
-      ReforgerServerSubCommand
-    ),
-    UseGroup(
-      { name: 'restart-conflict', description: 'Restarts the reforger server with the conflict config.'},
-      ReforgerServerSubCommand
-    )
   ]
 })
 
