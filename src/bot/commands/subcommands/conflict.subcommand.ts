@@ -2,7 +2,7 @@ import { SlashCommandPipe } from "@discord-nestjs/common";
 import { DiscordClientProvider, EventParams, Handler, IA, InteractionEvent, Param, SubCommand } from "@discord-nestjs/core";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { ChatInputCommandInteraction, ClientEvents, GuildMemberRoleManager, TextChannel } from "discord.js";
-import { permissionCheckMain } from "src/helpers/restart_stop_command_perms_check";
+import permissionCheck from "src/helpers/restart_stop_command_perms_check";
 import { handleServerData, updateDefaultScenario } from "src/helpers/reforger_server";
 
 class ConflictSubCommandParams {
@@ -23,7 +23,7 @@ export class ConflictServerSubCommand {
         if (args[0] instanceof ChatInputCommandInteraction) {
             action = args[0].options["_group"];
         }
-        const permCheck = permissionCheckMain(member)
+        const permCheck = permissionCheck(member)
 
         if (permCheck != true) {
             return permCheck
